@@ -32,9 +32,12 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.morshues.lazyathome.data.model.TgVideoItem
+import com.morshues.lazyathome.data.model.VideoItem
 import com.morshues.lazyathome.ui.main.TgVideoCardPresenter
-import com.morshues.lazyathome.ui.main.TgViewModel
+import com.morshues.lazyathome.ui.main.TgVideoViewModel
+import com.morshues.lazyathome.ui.main.VideoCardPresenter
 import com.morshues.lazyathome.ui.main.VideoPlayerActivity
+import com.morshues.lazyathome.ui.main.VideoViewModel
 
 /**
  * Loads a grid of cards with movies to browse.
@@ -48,7 +51,8 @@ class MainFragment : BrowseSupportFragment() {
     private var mBackgroundTimer: Timer? = null
     private var mBackgroundUri: String? = null
 
-    private val tgViewModel: TgViewModel by viewModels()
+    private val videosViewModel: VideoViewModel by viewModels()
+    private val tgVideosViewModel: TgVideoViewModel by viewModels()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         Log.i(TAG, "onCreate")
@@ -93,15 +97,27 @@ class MainFragment : BrowseSupportFragment() {
     private fun loadRows() {
         val rowsAdapter = ArrayObjectAdapter(ListRowPresenter())
 
+        val videoPresenter = VideoCardPresenter()
+        val videoListRowAdapter = ArrayObjectAdapter(videoPresenter)
+        videosViewModel.dataList.observe(requireActivity()) { tgItemList ->
+            for (tgItem in tgItemList.reversed()) {
+                videoListRowAdapter.add(tgItem)
+            }
+        }
+        videosViewModel.loadData()
+        val videoHeader = HeaderItem(0, "Videos")
+        rowsAdapter.add(ListRow(videoHeader, videoListRowAdapter))
+
+
         val tgVideoPresenter = TgVideoCardPresenter()
         val listRowAdapter = ArrayObjectAdapter(tgVideoPresenter)
-        tgViewModel.dataList.observe(requireActivity()) { tgItemList ->
+        tgVideosViewModel.dataList.observe(requireActivity()) { tgItemList ->
             for (tgItem in tgItemList) {
                 listRowAdapter.add(tgItem)
             }
         }
-        tgViewModel.loadData()
-        val header = HeaderItem(0, "TG Videos")
+        tgVideosViewModel.loadData()
+        val header = HeaderItem(1, "TG Videos")
         rowsAdapter.add(ListRow(header, listRowAdapter))
 
         val gridHeader = HeaderItem(1, "PREFERENCES")
@@ -131,9 +147,12 @@ class MainFragment : BrowseSupportFragment() {
             row: Row
         ) {
 
-            if (item is TgVideoItem) {
+            if (item is VideoItem) {
                 Log.d(TAG, "Item: $item")
-                VideoPlayerActivity.start(requireActivity(), item.id)
+                VideoPlayerActivity.start(requireActivity(), item.url)
+            } else if (item is TgVideoItem) {
+                Log.d(TAG, "Item: $item")
+                VideoPlayerActivity.start(requireActivity(), item.url)
             } else if (item is String) {
                 Toast.makeText(activity!!, item, Toast.LENGTH_SHORT).show()
             }
@@ -145,10 +164,14 @@ class MainFragment : BrowseSupportFragment() {
             itemViewHolder: Presenter.ViewHolder?, item: Any?,
             rowViewHolder: RowPresenter.ViewHolder, row: Row
         ) {
-            if (item is TgVideoItem) {
+            if (item is VideoItem) {
+                mBackgroundUri = item.src
+                startBackgroundTimer()
+            } else if (item is TgVideoItem) {
 //                mBackgroundUri = item.backgroundImageUrl
                 startBackgroundTimer()
             }
+
         }
     }
 

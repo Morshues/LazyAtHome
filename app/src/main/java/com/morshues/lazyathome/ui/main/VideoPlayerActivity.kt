@@ -8,7 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
-import com.morshues.lazyathome.data.network.RetrofitClient
 import com.morshues.lazyathome.databinding.ActivityVideoPlayerBinding
 
 class VideoPlayerActivity : ComponentActivity() {
@@ -60,10 +59,9 @@ class VideoPlayerActivity : ComponentActivity() {
     companion object {
         private const val EXTRA_VIDEO_URL = "extra_video_url"
 
-        fun start(context: Context, videoId: String) {
-            val videoUrl = RetrofitClient.BASE_URL + "tg/video?fileId=" + videoId
+        fun start(context: Context, url: String) {
             val intent = Intent(context, VideoPlayerActivity::class.java).apply {
-                putExtra(EXTRA_VIDEO_URL, videoUrl)
+                putExtra(EXTRA_VIDEO_URL, url)
             }
             context.startActivity(intent)
         }

@@ -3,13 +3,13 @@ package com.morshues.lazyathome.ui.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.morshues.lazyathome.data.model.TgVideoItem
-import com.morshues.lazyathome.data.repository.TgVideoRepository
+import com.morshues.lazyathome.data.model.VideoItem
+import com.morshues.lazyathome.data.repository.VideoRepository
 
-class TgViewModel : ViewModel() {
-    private val repository = TgVideoRepository()
-    private val _dataList = MutableLiveData<List<TgVideoItem>>()
-    val dataList: LiveData<List<TgVideoItem>> get() = _dataList
+class VideoViewModel : ViewModel() {
+    private val repository = VideoRepository()
+    private val _dataList = MutableLiveData<List<VideoItem>>()
+    val dataList: LiveData<List<VideoItem>> get() = _dataList
 
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> get() = _errorMessage
