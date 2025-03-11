@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.morshues.lazyathome.databinding.ActivityVideoPlayerBinding
 
@@ -15,9 +16,10 @@ class VideoPlayerActivity : ComponentActivity() {
     private var player: ExoPlayer? = null
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
+        @UnstableApi
         override fun handleOnBackPressed() {
-            if (binding.playerView.useController) {
-                binding.playerView.useController = false
+            if (binding.playerView.isControllerFullyVisible) {
+                binding.playerView.hideController()
             } else {
                 isEnabled = false
                 onBackPressedDispatcher.onBackPressed()
