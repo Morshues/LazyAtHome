@@ -31,12 +31,11 @@ import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
-import com.morshues.lazyathome.data.model.TgVideoItem
-import com.morshues.lazyathome.ui.main.TgVideoCardPresenter
-import com.morshues.lazyathome.ui.main.TgVideoViewModel
+import com.morshues.lazyathome.ui.common.RowController
 import com.morshues.lazyathome.ui.library.LibraryRowController
-import com.morshues.lazyathome.ui.main.VideoPlayerActivity
 import com.morshues.lazyathome.ui.library.LibraryViewModel
+import com.morshues.lazyathome.ui.tg.TgRowController
+import com.morshues.lazyathome.ui.tg.TgVideoViewModel
 
 /**
  * Loads a grid of cards with movies to browse.
@@ -53,7 +52,7 @@ class MainFragment : BrowseSupportFragment() {
     private val libraryViewModel: LibraryViewModel by viewModels()
     private val tgVideosViewModel: TgVideoViewModel by viewModels()
 
-    private lateinit var libraryController: LibraryRowController
+    private lateinit var rowToControllerMap: Map<Row, RowController>
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         Log.i(TAG, "onCreate")
@@ -98,22 +97,23 @@ class MainFragment : BrowseSupportFragment() {
     private fun loadRows() {
         val rowsAdapter = ArrayObjectAdapter(ListRowPresenter())
 
-        libraryController = LibraryRowController(
+        val libraryController = LibraryRowController(
             activity = requireActivity(),
             viewModel = libraryViewModel,
         )
         rowsAdapter.add(libraryController.listRow)
 
-        val tgVideoPresenter = TgVideoCardPresenter()
-        val listRowAdapter = ArrayObjectAdapter(tgVideoPresenter)
-        tgVideosViewModel.dataList.observe(requireActivity()) { tgItemList ->
-            for (tgItem in tgItemList) {
-                listRowAdapter.add(tgItem)
-            }
-        }
-        tgVideosViewModel.loadData()
-        val header = HeaderItem(1, "TG Videos")
-        rowsAdapter.add(ListRow(header, listRowAdapter))
+        val tgController = TgRowController(
+            activity = requireActivity(),
+            viewModel = tgVideosViewModel,
+        )
+        rowsAdapter.add(tgController.listRow)
+
+        rowToControllerMap = listOf(
+            libraryController,
+            tgController,
+        ).associateBy { it.listRow }
+
 
         val gridHeader = HeaderItem(1, "PREFERENCES")
         val mGridPresenter = GridItemPresenter()
@@ -141,17 +141,13 @@ class MainFragment : BrowseSupportFragment() {
             rowViewHolder: RowPresenter.ViewHolder,
             row: Row
         ) {
-            when (row) {
-                libraryController.listRow -> libraryController.onClick(item)
-                else -> {
-                    if (item is TgVideoItem) {
+            rowToControllerMap[row]?.onClick(item)
+                ?: run {
+                    if (item is String) {
                         Log.d(TAG, "Item: $item")
-                        VideoPlayerActivity.start(requireActivity(), item.url)
-                    } else if (item is String) {
-                        Toast.makeText(activity!!, item, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), item, Toast.LENGTH_SHORT).show()
                     }
                 }
-            }
         }
     }
 
@@ -160,17 +156,9 @@ class MainFragment : BrowseSupportFragment() {
             itemViewHolder: Presenter.ViewHolder?, item: Any?,
             rowViewHolder: RowPresenter.ViewHolder, row: Row
         ) {
-            when (row) {
-                libraryController.listRow -> {
-                    mBackgroundUri = libraryController.getBackgroundUri(item)
-                    startBackgroundTimer()
-                }
-//                else -> {
-//                    if (item is TgVideoItem) {
-//                        mBackgroundUri = item.backgroundImageUrl
-//                        startBackgroundTimer()
-//                    }
-//                }
+            rowToControllerMap[row]?.getBackgroundUri(item)?.let {
+                mBackgroundUri = it
+                startBackgroundTimer()
             }
         }
     }

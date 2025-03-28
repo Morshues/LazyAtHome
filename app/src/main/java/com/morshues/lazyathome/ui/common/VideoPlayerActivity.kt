@@ -1,9 +1,10 @@
-package com.morshues.lazyathome.ui.main
+package com.morshues.lazyathome.ui.common
 
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.media3.common.MediaItem
@@ -34,6 +35,8 @@ class VideoPlayerActivity : ComponentActivity() {
 
         val videoUrl = intent.getStringExtra(EXTRA_VIDEO_URL) ?: return
         initializePlayer(videoUrl)
+
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }

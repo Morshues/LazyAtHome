@@ -1,4 +1,4 @@
-package com.morshues.lazyathome.ui.main
+package com.morshues.lazyathome.ui.tg
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

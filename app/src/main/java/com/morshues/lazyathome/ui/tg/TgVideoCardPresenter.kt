@@ -1,4 +1,4 @@
-package com.morshues.lazyathome.ui.main
+package com.morshues.lazyathome.ui.tg
 
 import android.graphics.drawable.Drawable
 import android.util.Log
