@@ -1,4 +1,4 @@
-package com.morshues.lazyathome.ui.main
+package com.morshues.lazyathome.ui.library
 
 import android.graphics.drawable.Drawable
 import android.util.Log
@@ -8,10 +8,11 @@ import androidx.leanback.widget.ImageCardView
 import androidx.leanback.widget.Presenter
 import com.bumptech.glide.Glide
 import com.morshues.lazyathome.R
-import com.morshues.lazyathome.data.model.VideoItem
+import com.morshues.lazyathome.data.model.LibraryItem
+import com.morshues.lazyathome.ui.common.GoBackUIItem
 import kotlin.properties.Delegates
 
-class VideoCardPresenter : Presenter() {
+class LibraryCardPresenter : Presenter() {
     private var mDefaultCardImage: Drawable? = null
     private var sSelectedBackgroundColor: Int by Delegates.notNull()
     private var sDefaultBackgroundColor: Int by Delegates.notNull()
@@ -38,18 +39,26 @@ class VideoCardPresenter : Presenter() {
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, item: Any) {
-        val video = item as VideoItem
+        Log.d(TAG, "onBindViewHolder")
         val cardView = viewHolder.view as ImageCardView
 
-        Log.d(TAG, "onBindViewHolder")
-        cardView.titleText = video.id
-        cardView.contentText = video.id
-        cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT)
-        Glide.with(viewHolder.view.context)
-            .load(video.src)
-            .centerCrop()
-            .error(mDefaultCardImage)
-            .into(cardView.mainImageView)
+        if (item is GoBackUIItem) {
+            cardView.titleText = "← Go Back"
+            cardView.contentText = ""
+            cardView.setMainImageDimensions(300, 200)
+            return
+        } else if (item is LibraryItem) {
+            cardView.titleText = item.name
+            cardView.contentText = item.name
+            cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT)
+            if (item is LibraryItem.VideoItem) {
+                Glide.with(viewHolder.view.context)
+                    .load(item.src)
+                    .centerCrop()
+                    .error(mDefaultCardImage)
+                    .into(cardView.mainImageView)
+            }
+        }
     }
 
     override fun onUnbindViewHolder(viewHolder: ViewHolder) {
@@ -69,9 +78,9 @@ class VideoCardPresenter : Presenter() {
     }
 
     companion object {
-        private val TAG = "VideoCardPresenter"
+        private const val TAG = "LibraryCardPresenter"
 
-        private val CARD_WIDTH = 313
-        private val CARD_HEIGHT = 176
+        private const val CARD_WIDTH = 313
+        private const val CARD_HEIGHT = 176
     }
 }

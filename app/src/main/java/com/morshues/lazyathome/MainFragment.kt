@@ -32,12 +32,11 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.morshues.lazyathome.data.model.TgVideoItem
-import com.morshues.lazyathome.data.model.VideoItem
 import com.morshues.lazyathome.ui.main.TgVideoCardPresenter
 import com.morshues.lazyathome.ui.main.TgVideoViewModel
-import com.morshues.lazyathome.ui.main.VideoCardPresenter
+import com.morshues.lazyathome.ui.library.LibraryRowController
 import com.morshues.lazyathome.ui.main.VideoPlayerActivity
-import com.morshues.lazyathome.ui.main.VideoViewModel
+import com.morshues.lazyathome.ui.library.LibraryViewModel
 
 /**
  * Loads a grid of cards with movies to browse.
@@ -51,8 +50,10 @@ class MainFragment : BrowseSupportFragment() {
     private var mBackgroundTimer: Timer? = null
     private var mBackgroundUri: String? = null
 
-    private val videosViewModel: VideoViewModel by viewModels()
+    private val libraryViewModel: LibraryViewModel by viewModels()
     private val tgVideosViewModel: TgVideoViewModel by viewModels()
+
+    private lateinit var libraryController: LibraryRowController
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         Log.i(TAG, "onCreate")
@@ -97,17 +98,11 @@ class MainFragment : BrowseSupportFragment() {
     private fun loadRows() {
         val rowsAdapter = ArrayObjectAdapter(ListRowPresenter())
 
-        val videoPresenter = VideoCardPresenter()
-        val videoListRowAdapter = ArrayObjectAdapter(videoPresenter)
-        videosViewModel.dataList.observe(requireActivity()) { tgItemList ->
-            for (tgItem in tgItemList.reversed()) {
-                videoListRowAdapter.add(tgItem)
-            }
-        }
-        videosViewModel.loadData()
-        val videoHeader = HeaderItem(0, "Videos")
-        rowsAdapter.add(ListRow(videoHeader, videoListRowAdapter))
-
+        libraryController = LibraryRowController(
+            activity = requireActivity(),
+            viewModel = libraryViewModel,
+        )
+        rowsAdapter.add(libraryController.listRow)
 
         val tgVideoPresenter = TgVideoCardPresenter()
         val listRowAdapter = ArrayObjectAdapter(tgVideoPresenter)
@@ -146,15 +141,16 @@ class MainFragment : BrowseSupportFragment() {
             rowViewHolder: RowPresenter.ViewHolder,
             row: Row
         ) {
-
-            if (item is VideoItem) {
-                Log.d(TAG, "Item: $item")
-                VideoPlayerActivity.start(requireActivity(), item.url)
-            } else if (item is TgVideoItem) {
-                Log.d(TAG, "Item: $item")
-                VideoPlayerActivity.start(requireActivity(), item.url)
-            } else if (item is String) {
-                Toast.makeText(activity!!, item, Toast.LENGTH_SHORT).show()
+            when (row) {
+                libraryController.listRow -> libraryController.onClick(item)
+                else -> {
+                    if (item is TgVideoItem) {
+                        Log.d(TAG, "Item: $item")
+                        VideoPlayerActivity.start(requireActivity(), item.url)
+                    } else if (item is String) {
+                        Toast.makeText(activity!!, item, Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
     }
@@ -164,14 +160,18 @@ class MainFragment : BrowseSupportFragment() {
             itemViewHolder: Presenter.ViewHolder?, item: Any?,
             rowViewHolder: RowPresenter.ViewHolder, row: Row
         ) {
-            if (item is VideoItem) {
-                mBackgroundUri = item.src
-                startBackgroundTimer()
-            } else if (item is TgVideoItem) {
-//                mBackgroundUri = item.backgroundImageUrl
-                startBackgroundTimer()
+            when (row) {
+                libraryController.listRow -> {
+                    mBackgroundUri = libraryController.getBackgroundUri(item)
+                    startBackgroundTimer()
+                }
+//                else -> {
+//                    if (item is TgVideoItem) {
+//                        mBackgroundUri = item.backgroundImageUrl
+//                        startBackgroundTimer()
+//                    }
+//                }
             }
-
         }
     }
 

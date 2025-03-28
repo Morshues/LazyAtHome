@@ -1,17 +1,17 @@
 package com.morshues.lazyathome.data.repository
 
-import com.morshues.lazyathome.data.model.VideoItem
+import com.morshues.lazyathome.data.model.LibraryItem
 import com.morshues.lazyathome.data.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class VideoRepository {
-    fun fetchVideoList(onSuccess: (List<VideoItem>) -> Unit, onError: (String) -> Unit) {
-        val call = RetrofitClient.apiService.fetchVideoList()
+class LibraryRepository {
+    fun fetchLibraryList(onSuccess: (List<LibraryItem>) -> Unit, onError: (String) -> Unit) {
+        val call = RetrofitClient.apiService.fetchLibraryList()
 
-        call.enqueue(object : Callback<List<VideoItem>> {
-            override fun onResponse(call: Call<List<VideoItem>>, response: Response<List<VideoItem>>) {
+        call.enqueue(object : Callback<List<LibraryItem>> {
+            override fun onResponse(call: Call<List<LibraryItem>>, response: Response<List<LibraryItem>>) {
                 if (response.isSuccessful) {
                     response.body()?.let {
                         onSuccess(it)
@@ -21,7 +21,7 @@ class VideoRepository {
                 }
             }
 
-            override fun onFailure(call: Call<List<VideoItem>>, t: Throwable) {
+            override fun onFailure(call: Call<List<LibraryItem>>, t: Throwable) {
                 onError("Request Failed: ${t.message}")
             }
         })
