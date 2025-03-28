@@ -12,6 +12,6 @@ interface ApiService {
     @POST("tg/list")
     fun fetchTgVideoList(@Body requestBody: TgVideoListRequestData): Call<List<TgVideoItem>>
 
-    @GET("video/list")
+    @GET("library/list")
     fun fetchLibraryList(): Call<List<LibraryItem>>
 }
