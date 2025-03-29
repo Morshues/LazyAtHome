@@ -23,13 +23,15 @@ import androidx.core.content.ContextCompat
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.fragment.app.viewModels
 
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.morshues.lazyathome.ui.bangga.BanggaRowController
 import com.morshues.lazyathome.ui.bangga.BanggaViewModel
@@ -56,17 +58,34 @@ class MainFragment : BrowseSupportFragment() {
     private val banggaViewModel: BanggaViewModel by viewModels()
 
     private lateinit var rowToControllerMap: Map<Row, RowController>
+    private var currentSelectedRow: Row? = null
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         Log.i(TAG, "onCreate")
-        super.onActivityCreated(savedInstanceState)
+        super.onCreate(savedInstanceState)
+
+        requireActivity().onBackPressedDispatcher.addCallback(this) {
+            if (isShowingHeaders || !handleBackInRows()) {
+                isEnabled = false
+                requireActivity().onBackPressedDispatcher.onBackPressed()
+                isEnabled = true
+            }
+        }
+    }
+
+    private fun handleBackInRows(): Boolean {
+        return currentSelectedRow
+            ?.let { rowToControllerMap[it] }
+            ?.handleBackPress() ?: false
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.i(TAG, "onViewCreated")
+        super.onViewCreated(view, savedInstanceState)
 
         prepareBackgroundManager()
-
         setupUIElements()
-
         loadRows()
-
         setupEventListeners()
     }
 
@@ -166,6 +185,7 @@ class MainFragment : BrowseSupportFragment() {
             itemViewHolder: Presenter.ViewHolder?, item: Any?,
             rowViewHolder: RowPresenter.ViewHolder, row: Row
         ) {
+            currentSelectedRow = row
             rowToControllerMap[row]?.getBackgroundUri(item)?.let {
                 mBackgroundUri = it
                 startBackgroundTimer()
@@ -180,14 +200,14 @@ class MainFragment : BrowseSupportFragment() {
             .load(uri)
             .centerCrop()
             .error(mDefaultBackground)
-            .into<SimpleTarget<Drawable>>(
-                object : SimpleTarget<Drawable>(width, height) {
+            .into(object : CustomTarget<Drawable>(width, height) {
                     override fun onResourceReady(
                         drawable: Drawable,
                         transition: Transition<in Drawable>?
                     ) {
                         mBackgroundManager.drawable = drawable
                     }
+                    override fun onLoadCleared(placeholder: Drawable?) {}
                 })
         mBackgroundTimer?.cancel()
     }
