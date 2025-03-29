@@ -1,4 +1,4 @@
-package com.morshues.lazyathome.data.network
+package com.morshues.lazyathome.data.api
 
 import com.morshues.lazyathome.data.model.TgVideoListRequestData
 import com.morshues.lazyathome.data.model.TgVideoItem

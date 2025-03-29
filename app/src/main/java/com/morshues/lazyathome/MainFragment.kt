@@ -31,6 +31,8 @@ import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
+import com.morshues.lazyathome.ui.bangga.BanggaRowController
+import com.morshues.lazyathome.ui.bangga.BanggaViewModel
 import com.morshues.lazyathome.ui.common.RowController
 import com.morshues.lazyathome.ui.library.LibraryRowController
 import com.morshues.lazyathome.ui.library.LibraryViewModel
@@ -51,6 +53,7 @@ class MainFragment : BrowseSupportFragment() {
 
     private val libraryViewModel: LibraryViewModel by viewModels()
     private val tgVideosViewModel: TgVideoViewModel by viewModels()
+    private val banggaViewModel: BanggaViewModel by viewModels()
 
     private lateinit var rowToControllerMap: Map<Row, RowController>
 
@@ -109,13 +112,20 @@ class MainFragment : BrowseSupportFragment() {
         )
         rowsAdapter.add(tgController.listRow)
 
+        val banggaController = BanggaRowController(
+            activity = requireActivity(),
+            viewModel = banggaViewModel,
+        )
+        rowsAdapter.add(banggaController.listRow)
+
         rowToControllerMap = listOf(
             libraryController,
             tgController,
+            banggaController,
         ).associateBy { it.listRow }
 
 
-        val gridHeader = HeaderItem(1, "PREFERENCES")
+        val gridHeader = HeaderItem(9, "PREFERENCES")
         val mGridPresenter = GridItemPresenter()
         val gridRowAdapter = ArrayObjectAdapter(mGridPresenter)
         gridRowAdapter.add(resources.getString(R.string.personal_settings))

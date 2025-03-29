@@ -2,6 +2,7 @@ package com.morshues.lazyathome.data.network
 
 import com.google.gson.GsonBuilder
 import com.morshues.lazyathome.BuildConfig
+import com.morshues.lazyathome.data.api.ApiService
 import com.morshues.lazyathome.data.model.LibraryItem
 import com.morshues.lazyathome.data.model.LibraryItemDeserializer
 import retrofit2.Retrofit
