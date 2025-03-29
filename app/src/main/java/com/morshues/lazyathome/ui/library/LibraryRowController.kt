@@ -31,6 +31,15 @@ class LibraryRowController(
         viewModel.loadData()
     }
 
+    override fun handleBackPress(): Boolean {
+        if (viewModel.canGoBack) {
+            viewModel.goBack()
+            return true
+        } else {
+            return false
+        }
+    }
+
     override fun onClick(item: Any) {
         when (item) {
             is LibraryItem.VideoItem -> {
