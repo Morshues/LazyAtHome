@@ -8,9 +8,10 @@ import com.morshues.lazyathome.data.model.BanggaAnimationItem
 import com.morshues.lazyathome.data.model.BanggaCategoryItem
 import com.morshues.lazyathome.data.model.BanggaDisplayable
 import com.morshues.lazyathome.data.repository.BanggaRepository
+import com.morshues.lazyathome.ui.common.IVideoListModel
 import kotlinx.coroutines.launch
 
-class BanggaViewModel : ViewModel() {
+class BanggaViewModel : ViewModel(), IVideoListModel {
     private val repository = BanggaRepository()
 
     private val _categoryList = MutableLiveData<List<BanggaCategoryItem>>()
@@ -24,7 +25,7 @@ class BanggaViewModel : ViewModel() {
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
-    val canGoBack: Boolean
+    override val canGoBack: Boolean
         get() = _animationItem.value != null
 
     fun loadData() {
@@ -53,7 +54,7 @@ class BanggaViewModel : ViewModel() {
         }
     }
 
-    fun goBack() {
+    override fun goBack() {
         _animationItem.value = null
         _displayList.value = _categoryList.value
     }

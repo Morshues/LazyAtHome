@@ -12,7 +12,7 @@ import com.morshues.lazyathome.ui.common.VideoPlayerActivity
 class LibraryRowController(
     private val activity: FragmentActivity,
     private val viewModel: LibraryViewModel,
-) : RowController{
+) : RowController(viewModel) {
     private val cardPresenter = LibraryCardPresenter()
     private val rowAdapter = ArrayObjectAdapter(cardPresenter)
     private val header = HeaderItem(0, "Library")
@@ -29,15 +29,6 @@ class LibraryRowController(
             rowAdapter.setItems(uiList, null)
         }
         viewModel.loadData()
-    }
-
-    override fun handleBackPress(): Boolean {
-        if (viewModel.canGoBack) {
-            viewModel.goBack()
-            return true
-        } else {
-            return false
-        }
     }
 
     override fun onClick(item: Any) {

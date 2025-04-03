@@ -5,8 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.morshues.lazyathome.data.model.LibraryItem
 import com.morshues.lazyathome.data.repository.LibraryRepository
+import com.morshues.lazyathome.ui.common.IVideoListModel
 
-class LibraryViewModel : ViewModel() {
+class LibraryViewModel : ViewModel(), IVideoListModel {
     private val repository = LibraryRepository()
     private lateinit var rootList: List<LibraryItem>
     private val _displayList = MutableLiveData<List<LibraryItem>>()
@@ -16,7 +17,7 @@ class LibraryViewModel : ViewModel() {
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> get() = _errorMessage
 
-    val canGoBack: Boolean
+    override val canGoBack: Boolean
         get() = backwardItemStack.isNotEmpty()
 
     fun loadData() {
@@ -35,7 +36,7 @@ class LibraryViewModel : ViewModel() {
         _displayList.postValue(item.children)
     }
 
-    fun goBack() {
+    override fun goBack() {
         val lastList = backwardItemStack.removeLastOrNull() ?: rootList
         _displayList.postValue(lastList)
     }

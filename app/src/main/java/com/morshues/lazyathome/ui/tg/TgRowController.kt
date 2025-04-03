@@ -10,8 +10,8 @@ import com.morshues.lazyathome.ui.common.VideoPlayerActivity
 
 class TgRowController(
     private val activity: FragmentActivity,
-    private val viewModel: TgVideoViewModel,
-) : RowController {
+    viewModel: TgVideoViewModel,
+) : RowController(viewModel) {
     private val cardPresenter = TgVideoCardPresenter()
     private val rowAdapter = ArrayObjectAdapter(cardPresenter)
     private val header = HeaderItem(1, "TG Videos")

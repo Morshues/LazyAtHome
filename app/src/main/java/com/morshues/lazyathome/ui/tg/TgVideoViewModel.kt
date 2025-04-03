@@ -5,8 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.morshues.lazyathome.data.model.TgVideoItem
 import com.morshues.lazyathome.data.repository.TgVideoRepository
+import com.morshues.lazyathome.ui.common.IVideoListModel
 
-class TgVideoViewModel : ViewModel() {
+class TgVideoViewModel : ViewModel(), IVideoListModel {
     private val repository = TgVideoRepository()
     private val _dataList = MutableLiveData<List<TgVideoItem>>()
     val dataList: LiveData<List<TgVideoItem>> get() = _dataList

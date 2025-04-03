@@ -14,7 +14,7 @@ import com.morshues.lazyathome.ui.common.VideoPlayerActivity
 class BanggaRowController(
     private val activity: FragmentActivity,
     private val viewModel: BanggaViewModel,
-) : RowController {
+) : RowController(viewModel) {
     private val cardPresenter = BanggaCardPresenter()
     private val rowAdapter = ArrayObjectAdapter(cardPresenter)
     private val header = HeaderItem(2, "Bangga")
@@ -35,15 +35,6 @@ class BanggaRowController(
         }
 
         viewModel.loadData()
-    }
-
-    override fun handleBackPress(): Boolean {
-        if (viewModel.canGoBack) {
-            viewModel.goBack()
-            return true
-        } else {
-            return false
-        }
     }
 
     override fun onClick(item: Any) {

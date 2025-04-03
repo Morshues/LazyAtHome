@@ -2,9 +2,18 @@ package com.morshues.lazyathome.ui.common
 
 import androidx.leanback.widget.ListRow
 
-interface RowController {
-    val listRow: ListRow
-    fun handleBackPress(): Boolean = false
-    fun onClick(item: Any)
-    fun getBackgroundUri(item: Any?): String?
+abstract class RowController(
+    private val videoListModel: IVideoListModel,
+) {
+    abstract val listRow: ListRow
+    fun handleBackPress(): Boolean {
+        if (videoListModel.canGoBack) {
+            videoListModel.goBack()
+            return true
+        } else {
+            return false
+        }
+    }
+    abstract fun onClick(item: Any)
+    abstract fun getBackgroundUri(item: Any?): String?
 }
