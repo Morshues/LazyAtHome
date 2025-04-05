@@ -34,7 +34,7 @@ class LibraryRowController(
     override fun onClick(item: Any) {
         when (item) {
             is LibraryItem.VideoItem -> {
-                VideoPlayerActivity.start(activity, item.url)
+                VideoPlayerActivity.start(activity, viewModel.getPlayableList(), viewModel.getIndexOf(item))
             }
             is LibraryItem.FolderItem -> {
                 viewModel.enterFolder(item)

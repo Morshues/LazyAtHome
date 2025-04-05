@@ -37,6 +37,8 @@ data class BanggaEpisode(
 ) : BanggaDisplayable
 
 data class BanggaVideoItem(
+    @SerializedName("contentId")
+    val id: String,
     val video: BanggaSubVideoItem,
 )
 

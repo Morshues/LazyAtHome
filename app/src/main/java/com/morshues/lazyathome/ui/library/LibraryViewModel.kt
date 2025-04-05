@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import com.morshues.lazyathome.data.model.LibraryItem
 import com.morshues.lazyathome.data.repository.LibraryRepository
 import com.morshues.lazyathome.ui.common.IVideoListModel
+import com.morshues.lazyathome.player.IPlayable
+import com.morshues.lazyathome.player.StaticPlayableItem
 
 class LibraryViewModel : ViewModel(), IVideoListModel {
     private val repository = LibraryRepository()
@@ -39,5 +41,23 @@ class LibraryViewModel : ViewModel(), IVideoListModel {
     override fun goBack() {
         val lastList = backwardItemStack.removeLastOrNull() ?: rootList
         _displayList.postValue(lastList)
+    }
+
+    override fun getPlayableList(): List<IPlayable> {
+        val result = mutableListOf<IPlayable>()
+        _displayList.value?.forEach {
+            if (it is LibraryItem.VideoItem) {
+                result.add(StaticPlayableItem(it.url, it.name))
+            }
+        }
+        return result
+    }
+
+    override fun getIndexOf(item: Any): Int {
+        return if (item is LibraryItem.VideoItem) {
+            _displayList.value?.filterIsInstance<LibraryItem.VideoItem>()?.indexOf(item) ?: -1
+        } else {
+            -1
+        }
     }
 }

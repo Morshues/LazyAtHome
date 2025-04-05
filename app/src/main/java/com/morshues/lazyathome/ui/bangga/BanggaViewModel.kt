@@ -7,8 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.morshues.lazyathome.data.model.BanggaAnimationItem
 import com.morshues.lazyathome.data.model.BanggaCategoryItem
 import com.morshues.lazyathome.data.model.BanggaDisplayable
+import com.morshues.lazyathome.data.model.BanggaEpisode
 import com.morshues.lazyathome.data.repository.BanggaRepository
 import com.morshues.lazyathome.ui.common.IVideoListModel
+import com.morshues.lazyathome.player.IPlayable
 import kotlinx.coroutines.launch
 
 class BanggaViewModel : ViewModel(), IVideoListModel {
@@ -18,9 +20,6 @@ class BanggaViewModel : ViewModel(), IVideoListModel {
     private val _animationItem = MutableLiveData<BanggaAnimationItem?>()
     private val _displayList = MutableLiveData<List<BanggaDisplayable>>()
     val displayList: LiveData<List<BanggaDisplayable>> = _displayList
-
-    private val _videoLink = MutableLiveData<String>()
-    val videoLink: LiveData<String> = _videoLink
 
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
@@ -59,14 +58,32 @@ class BanggaViewModel : ViewModel(), IVideoListModel {
         _displayList.value = _categoryList.value
     }
 
-    fun getVideo(id: String) {
-        viewModelScope.launch {
-            val result = repository.fetchVideoItem(id)
-            result
-                .onSuccess {
-                    _videoLink.value = it.video.url
+    override fun getPlayableList(): List<IPlayable> {
+        val result = mutableListOf<IPlayable>()
+        _animationItem.value?.episodes?.forEach {
+            result.add(BanggaPlayableItem(it.id, it.title) { id ->
+                val item = repository.fetchVideoItem(id).getOrElse {
+                    return@BanggaPlayableItem ""
                 }
-                .onFailure { _errorMessage.value = it.message }
+                return@BanggaPlayableItem item.video.url
+            })
         }
+        return result
+    }
+
+    override fun getIndexOf(item: Any): Int {
+        return if (item is BanggaEpisode) {
+            _displayList.value?.filterIsInstance<BanggaEpisode>()?.indexOf(item) ?: -1
+        } else {
+            -1
+        }
+    }
+
+    data class BanggaPlayableItem(
+        val id: String,
+        override val title: String?,
+        val fetcher: suspend (String) -> String
+    ) : IPlayable {
+        override suspend fun resolveUrl(): String = fetcher(id)
     }
 }

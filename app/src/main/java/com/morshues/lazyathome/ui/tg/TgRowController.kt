@@ -10,7 +10,7 @@ import com.morshues.lazyathome.ui.common.VideoPlayerActivity
 
 class TgRowController(
     private val activity: FragmentActivity,
-    viewModel: TgVideoViewModel,
+    private val viewModel: TgVideoViewModel,
 ) : RowController(viewModel) {
     private val cardPresenter = TgVideoCardPresenter()
     private val rowAdapter = ArrayObjectAdapter(cardPresenter)
@@ -30,7 +30,7 @@ class TgRowController(
 
     override fun onClick(item: Any) {
         if (item is TgVideoItem) {
-            VideoPlayerActivity.start(activity, item.url)
+            VideoPlayerActivity.start(activity, viewModel.toPlayableList(item), 0)
         }
     }
 

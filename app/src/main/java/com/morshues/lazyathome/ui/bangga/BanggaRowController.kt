@@ -30,9 +30,6 @@ class BanggaRowController(
             uiList.addAll(itemList)
             rowAdapter.setItems(uiList, null)
         }
-        viewModel.videoLink.observe(activity) {
-            VideoPlayerActivity.start(activity, it)
-        }
 
         viewModel.loadData()
     }
@@ -40,7 +37,9 @@ class BanggaRowController(
     override fun onClick(item: Any) {
         when (item) {
             is BanggaCategoryItem -> viewModel.setCategory(item.id)
-            is BanggaEpisode -> viewModel.getVideo(item.id)
+            is BanggaEpisode -> {
+                VideoPlayerActivity.start(activity, viewModel.getPlayableList(), viewModel.getIndexOf(item))
+            }
             is GoBackUIItem -> viewModel.goBack()
         }
     }
