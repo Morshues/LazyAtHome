@@ -81,7 +81,7 @@ class BanggaViewModel : ViewModel(), IVideoListModel {
 
     data class BanggaPlayableItem(
         val id: String,
-        override val title: String?,
+        override val title: String,
         val fetcher: suspend (String) -> String
     ) : IPlayable {
         override suspend fun resolveUrl(): String = fetcher(id)

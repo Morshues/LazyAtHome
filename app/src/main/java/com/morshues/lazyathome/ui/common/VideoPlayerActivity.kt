@@ -2,8 +2,12 @@ package com.morshues.lazyathome.ui.common
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.view.WindowManager
+import android.widget.ImageButton
+import android.widget.ProgressBar
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.annotation.OptIn
@@ -13,6 +17,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerControlView
 import com.morshues.lazyathome.databinding.ActivityVideoPlayerBinding
 import com.morshues.lazyathome.player.IPlayable
@@ -26,22 +31,8 @@ class VideoPlayerActivity : ComponentActivity() {
     private val playlist = VideoPlayerLauncherHolder.pendingPlaylist ?: emptyList()
     private var currentIndex: Int = 0
 
-    private fun playNext() {
-        lifecycleScope.launch {
-            val item = playlist.getOrNull(currentIndex + 1) ?: return@launch
-            val url = item.resolveUrl()
-
-            binding.videoTitle.text = item.title ?: ""
-            player?.apply {
-                val mediaItem = MediaItem.Builder()
-                    .setUri(url)
-                    .build()
-                setMediaItem(mediaItem)
-                playWhenReady = true
-                prepare()
-            }
-        }
-    }
+    private lateinit var prevButton: ImageButton
+    private lateinit var nextButton: ImageButton
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         @UnstableApi
@@ -55,6 +46,20 @@ class VideoPlayerActivity : ComponentActivity() {
         }
     }
 
+    private val playerListener = object : Player.Listener {
+        override fun onPlaybackStateChanged(state: Int) {
+            updateTitleVisibility()
+            if (state == Player.STATE_ENDED) {
+                playVideo(currentIndex + 1)
+            }
+        }
+
+        override fun onEvents(player: Player, events: Player.Events) {
+            super.onEvents(player, events)
+            refreshNavigationButtons()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityVideoPlayerBinding.inflate(layoutInflater)
@@ -62,12 +67,7 @@ class VideoPlayerActivity : ComponentActivity() {
 
         currentIndex = intent.getIntExtra(EXTRA_VIDEO_INDEX, 0)
 
-        lifecycleScope.launch {
-            val item = playlist.getOrNull(currentIndex) ?: return@launch
-            val url = item.resolveUrl()
-            val title = item.title ?: ""
-            initializePlayer(url, title)
-        }
+        initializePlayer()
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -75,27 +75,34 @@ class VideoPlayerActivity : ComponentActivity() {
     }
 
     @OptIn(UnstableApi::class)
-    private fun initializePlayer(videoUrl: String, title: String) {
-        player = ExoPlayer.Builder(this).build().apply {
-            addListener(object : Player.Listener {
-                override fun onPlaybackStateChanged(state: Int) {
-                    updateTitleVisibility()
-                    if (state == Player.STATE_ENDED) {
-                        playNext()
-                    }
-                }
-            })
-            binding.videoTitle.text = title
-            val mediaItem = MediaItem.Builder()
-                .setUri(videoUrl)
-                .build()
-            setMediaItem(mediaItem)
-            playWhenReady = true
-            prepare()
+    private fun initializePlayer() {
+        val loadingView = binding.playerView.findViewById<ProgressBar>(androidx.media3.ui.R.id.exo_buffering)
+        loadingView.indeterminateTintList = ColorStateList.valueOf(Color.WHITE)
+
+        val timeBar = binding.playerView.findViewById<DefaultTimeBar>(androidx.media3.ui.R.id.exo_progress)
+        timeBar.setKeyTimeIncrement(5_000)
+
+        nextButton = binding.playerView.findViewById(androidx.media3.ui.R.id.exo_next)
+        nextButton.setOnClickListener {
+            playVideo(currentIndex+1)
         }
+
+        prevButton = binding.playerView.findViewById(androidx.media3.ui.R.id.exo_prev)
+        prevButton.setOnClickListener {
+            playVideo(currentIndex-1)
+        }
+
+        player = ExoPlayer.Builder(this)
+            .setSeekBackIncrementMs(30_000)
+            .setSeekForwardIncrementMs(30_000)
+            .build().apply {
+                addListener(playerListener)
+            }
+        playVideo(currentIndex)
         binding.playerView.player = player
         binding.playerView.setControllerVisibilityListener(PlayerControlView.VisibilityListener {
             updateTitleVisibility()
+            refreshNavigationButtons()
         })
     }
 
@@ -105,12 +112,38 @@ class VideoPlayerActivity : ComponentActivity() {
             binding.playerView.isControllerFullyVisible || player?.isPlaying != true
     }
 
+    private fun refreshNavigationButtons() {
+        prevButton.isEnabled = currentIndex > 0
+        prevButton.alpha = if (prevButton.isEnabled) 1.0f else 0.3f
+        nextButton.isEnabled = currentIndex < playlist.size - 1
+        nextButton.alpha = if (nextButton.isEnabled) 1.0f else 0.3f
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         releasePlayer()
     }
 
+    private fun playVideo(index: Int) {
+        lifecycleScope.launch {
+            playlist.getOrNull(index)?.apply {
+                binding.videoTitle.text = title
+                player?.apply {
+                    val mediaItem = MediaItem.Builder()
+                        .setUri(resolveUrl())
+                        .build()
+                    setMediaItem(mediaItem)
+                    playWhenReady = true
+                    prepare()
+                    currentIndex = index
+                }
+            }
+        }
+    }
+
     private fun releasePlayer() {
+        player?.removeListener(playerListener)
         player?.release()
         player = null
     }
