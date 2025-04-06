@@ -1,10 +1,12 @@
 package com.morshues.lazyathome.ui.common
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.WindowManager
 import android.widget.ImageButton
 import android.widget.ProgressBar
@@ -74,13 +76,19 @@ class VideoPlayerActivity : ComponentActivity() {
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        releasePlayer()
+    }
+
     @OptIn(UnstableApi::class)
     private fun initializePlayer() {
         val loadingView = binding.playerView.findViewById<ProgressBar>(androidx.media3.ui.R.id.exo_buffering)
         loadingView.indeterminateTintList = ColorStateList.valueOf(Color.WHITE)
 
         val timeBar = binding.playerView.findViewById<DefaultTimeBar>(androidx.media3.ui.R.id.exo_progress)
-        timeBar.setKeyTimeIncrement(5_000)
+        timeBar.setKeyTimeIncrement(30_000)
 
         nextButton = binding.playerView.findViewById(androidx.media3.ui.R.id.exo_next)
         nextButton.setOnClickListener {
@@ -93,8 +101,8 @@ class VideoPlayerActivity : ComponentActivity() {
         }
 
         player = ExoPlayer.Builder(this)
-            .setSeekBackIncrementMs(30_000)
-            .setSeekForwardIncrementMs(30_000)
+            .setSeekBackIncrementMs(120_000)
+            .setSeekForwardIncrementMs(120_000)
             .build().apply {
                 addListener(playerListener)
             }
@@ -119,10 +127,33 @@ class VideoPlayerActivity : ComponentActivity() {
         nextButton.alpha = if (nextButton.isEnabled) 1.0f else 0.3f
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        releasePlayer()
+    @SuppressLint("RestrictedApi")
+    @OptIn(UnstableApi::class)
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        val isLeftRightKey = event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT
+                || event.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
+        if (!binding.playerView.isControllerFullyVisible && isLeftRightKey) {
+            when (event.action) {
+                KeyEvent.ACTION_DOWN -> {
+                    player?.let { p ->
+                        val position = p.currentPosition
+                        val duration = p.duration
+                        if (event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                            val newPosition = (position - 5_000).coerceAtLeast(0)
+                            p.seekTo(newPosition)
+                        } else if (event.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                            val newPosition = (position + 5_000).coerceAtMost(duration)
+                            p.seekTo(newPosition)
+                        }
+                    }
+                    return true
+                }
+                KeyEvent.ACTION_UP -> {
+                    return true
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
     }
 
     private fun playVideo(index: Int) {
