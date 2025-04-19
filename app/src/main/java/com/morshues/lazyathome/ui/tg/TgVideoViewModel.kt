@@ -9,8 +9,9 @@ import com.morshues.lazyathome.ui.common.IVideoListModel
 import com.morshues.lazyathome.player.IPlayable
 import com.morshues.lazyathome.player.StaticPlayableItem
 
-class TgVideoViewModel : ViewModel(), IVideoListModel {
-    private val repository = TgVideoRepository()
+class TgVideoViewModel(
+    private val repository: TgVideoRepository
+) : ViewModel(), IVideoListModel {
     private val _dataList = MutableLiveData<List<TgVideoItem>>()
     val dataList: LiveData<List<TgVideoItem>> get() = _dataList
 

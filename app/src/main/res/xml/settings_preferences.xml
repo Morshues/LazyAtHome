@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <EditTextPreference
+        android:key="server_path"
+        android:title="@string/settings_pref_server_path_title"
+        android:defaultValue="http://192.168.1.126:3000/"
+        android:singleLine="true"
+        android:selectAllOnFocus="true" />
+
+    <Preference
+        android:key="row_order_editor"
+        android:title="@string/settings_pref_row_order_title"
+        android:summary="@string/settings_pref_row_order_summary" />
+
+    <SeekBarPreference
+        android:key="remote_seek_step_ms"
+        android:title="@string/settings_pref_remote_seek_title"
+        android:defaultValue="5"
+        android:min="1"
+        android:max="120"
+        app:seekBarIncrement="1" />
+
+    <SeekBarPreference
+        android:key="time_bar_seek_step_ms"
+        android:title="@string/settings_pref_time_bar_seek_title"
+        android:defaultValue="30"
+        android:min="1"
+        android:max="120"
+        app:seekBarIncrement="1" />
+
+    <SeekBarPreference
+        android:key="button_seek_step_ms"
+        android:title="@string/settings_pref_button_seek_title"
+        android:defaultValue="120"
+        android:min="1"
+        android:max="120"
+        app:seekBarIncrement="1" />
+
+</PreferenceScreen>

@@ -8,29 +8,32 @@ import com.morshues.lazyathome.data.model.BanggaCategoryItem
 import com.morshues.lazyathome.data.model.BanggaDisplayable
 import com.morshues.lazyathome.data.model.BanggaEpisode
 import com.morshues.lazyathome.ui.common.GoBackUIItem
-import com.morshues.lazyathome.ui.common.RowController
+import com.morshues.lazyathome.ui.common.BaseRowController
 import com.morshues.lazyathome.ui.common.VideoPlayerActivity
 
 class BanggaRowController(
+    title: String,
     private val activity: FragmentActivity,
     private val viewModel: BanggaViewModel,
-) : RowController(viewModel) {
+) : BaseRowController(viewModel) {
     private val cardPresenter = BanggaCardPresenter()
     private val rowAdapter = ArrayObjectAdapter(cardPresenter)
-    private val header = HeaderItem(2, "Bangga")
+    private val header = HeaderItem(0, title)
 
     override val listRow: ListRow = ListRow(header, rowAdapter)
 
     init {
         viewModel.displayList.observe(activity) { itemList ->
-            val uiList = mutableListOf<Any>()
+            val uiList = mutableListOf<Any?>()
             if (viewModel.canGoBack) {
                 uiList.add(GoBackUIItem)
             }
             uiList.addAll(itemList)
             rowAdapter.setItems(uiList, null)
         }
+    }
 
+    override fun loadData() {
         viewModel.loadData()
     }
 
@@ -49,5 +52,9 @@ class BanggaRowController(
             return item.image.url
         }
         return null
+    }
+
+    companion object {
+        const val ID = "bangga"
     }
 }

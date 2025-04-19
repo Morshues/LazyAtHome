@@ -19,8 +19,8 @@ sealed class LibraryItem {
         val thumbnail: String
     ) : LibraryItem() {
         val url: String
-            get() = RetrofitClient.BASE_URL + "library/" + path
+            get() = RetrofitClient.baseUrl + "library/" + path
         val src: String
-            get() = RetrofitClient.BASE_URL + "library/" + thumbnail
+            get() = RetrofitClient.baseUrl + "library/" + thumbnail
     }
 }

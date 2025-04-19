@@ -6,28 +6,32 @@ import androidx.leanback.widget.HeaderItem
 import androidx.leanback.widget.ListRow
 import com.morshues.lazyathome.data.model.LibraryItem
 import com.morshues.lazyathome.ui.common.GoBackUIItem
-import com.morshues.lazyathome.ui.common.RowController
+import com.morshues.lazyathome.ui.common.BaseRowController
 import com.morshues.lazyathome.ui.common.VideoPlayerActivity
 
 class LibraryRowController(
+    title: String,
     private val activity: FragmentActivity,
     private val viewModel: LibraryViewModel,
-) : RowController(viewModel) {
+) : BaseRowController(viewModel) {
     private val cardPresenter = LibraryCardPresenter()
     private val rowAdapter = ArrayObjectAdapter(cardPresenter)
-    private val header = HeaderItem(0, "Library")
+    private val header = HeaderItem(0, title)
 
     override val listRow: ListRow = ListRow(header, rowAdapter)
 
     init {
         viewModel.displayList.observe(activity) { itemList ->
-            val uiList = mutableListOf<Any>()
+            val uiList = mutableListOf<Any?>()
             if (viewModel.canGoBack) {
                 uiList.add(GoBackUIItem)
             }
             uiList.addAll(itemList.reversed())
             rowAdapter.setItems(uiList, null)
         }
+    }
+
+    override fun loadData() {
         viewModel.loadData()
     }
 
@@ -50,5 +54,9 @@ class LibraryRowController(
             return item.src
         }
         return null
+    }
+
+    companion object {
+        const val ID = "library"
     }
 }

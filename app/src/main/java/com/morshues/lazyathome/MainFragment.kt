@@ -3,16 +3,19 @@ package com.morshues.lazyathome
 import java.util.Timer
 import java.util.TimerTask
 
-import android.graphics.Color
+import android.app.Activity.RESULT_OK
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.DisplayMetrics
+import android.util.Log
+import android.view.View
+import android.widget.Toast
 import androidx.leanback.app.BackgroundManager
 import androidx.leanback.app.BrowseSupportFragment
 import androidx.leanback.widget.ArrayObjectAdapter
-import androidx.leanback.widget.HeaderItem
-import androidx.leanback.widget.ListRow
 import androidx.leanback.widget.ListRowPresenter
 import androidx.leanback.widget.OnItemViewClickedListener
 import androidx.leanback.widget.OnItemViewSelectedListener
@@ -20,26 +23,28 @@ import androidx.leanback.widget.Presenter
 import androidx.leanback.widget.Row
 import androidx.leanback.widget.RowPresenter
 import androidx.core.content.ContextCompat
-import android.util.DisplayMetrics
-import android.util.Log
-import android.view.Gravity
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.morshues.lazyathome.data.network.RetrofitClient
+import com.morshues.lazyathome.settings.SettingsManager
 import com.morshues.lazyathome.ui.bangga.BanggaRowController
 import com.morshues.lazyathome.ui.bangga.BanggaViewModel
-import com.morshues.lazyathome.ui.common.RowController
+import com.morshues.lazyathome.ui.common.BaseRowController
+import com.morshues.lazyathome.ui.common.RowInfo
 import com.morshues.lazyathome.ui.library.LibraryRowController
 import com.morshues.lazyathome.ui.library.LibraryViewModel
-import com.morshues.lazyathome.ui.tg.TgRowController
+import com.morshues.lazyathome.ui.library.LibraryViewModelFactory
+import com.morshues.lazyathome.ui.settings.SettingsActivity
+import com.morshues.lazyathome.ui.settings.SettingsRowController
+import com.morshues.lazyathome.ui.tg.TgVideoRowController
 import com.morshues.lazyathome.ui.tg.TgVideoViewModel
+import com.morshues.lazyathome.ui.tg.TgVideoViewModelFactory
 
 /**
  * Loads a grid of cards with movies to browse.
@@ -53,11 +58,12 @@ class MainFragment : BrowseSupportFragment() {
     private var mBackgroundTimer: Timer? = null
     private var mBackgroundUri: String? = null
 
-    private val libraryViewModel: LibraryViewModel by viewModels()
-    private val tgVideosViewModel: TgVideoViewModel by viewModels()
+    private lateinit var libraryViewModel: LibraryViewModel
+    private lateinit var tgVideosViewModel: TgVideoViewModel
     private val banggaViewModel: BanggaViewModel by viewModels()
+    private lateinit var allRowInfos: List<RowInfo>
 
-    private lateinit var rowToControllerMap: Map<Row, RowController>
+    private val rowToControllerMap = mutableMapOf<Row, BaseRowController>()
     private var currentSelectedRow: Row? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,6 +91,8 @@ class MainFragment : BrowseSupportFragment() {
 
         prepareBackgroundManager()
         setupUIElements()
+        resetViewModels()
+        initRows()
         loadRows()
         setupEventListeners()
     }
@@ -116,39 +124,67 @@ class MainFragment : BrowseSupportFragment() {
         searchAffordanceColor = ContextCompat.getColor(requireActivity(), R.color.search_opaque)
     }
 
+    private fun resetViewModels() {
+        viewModelStore.clear()
+        val service = RetrofitClient.getService(requireContext())
+        tgVideosViewModel = ViewModelProvider(this, TgVideoViewModelFactory(
+            service
+        ))[TgVideoViewModel::class.java]
+        libraryViewModel = ViewModelProvider(this, LibraryViewModelFactory(
+            service
+        ))[LibraryViewModel::class.java]
+    }
+
+    private fun initRows() {
+        allRowInfos = listOf(
+            RowInfo(LibraryRowController.ID) {
+                LibraryRowController(
+                    getString(R.string.row_library),
+                    requireActivity(),
+                    libraryViewModel,
+                )
+            },
+            RowInfo(TgVideoRowController.ID) {
+                TgVideoRowController(
+                    getString(R.string.row_tg_video),
+                    requireActivity(),
+                    tgVideosViewModel
+                )
+            },
+            RowInfo(BanggaRowController.ID) {
+                BanggaRowController(
+                    getString(R.string.row_bangga),
+                    requireActivity(),
+                    banggaViewModel,
+                    )
+            },
+        )
+    }
+
     private fun loadRows() {
+        val settings = SettingsManager.getRowOrderWithEnabled(requireContext())
+        val enabledRowIds = settings.filter { it.enabled }.map { it.id }
+
         val rowsAdapter = ArrayObjectAdapter(ListRowPresenter())
+        rowToControllerMap.clear()
+        enabledRowIds.forEach { id ->
+            val info = allRowInfos.find { it.id == id }
+            if (info != null) {
+                val controller = info.controllerProvider()
+                rowToControllerMap[controller.listRow] = controller
+                rowsAdapter.add(controller.listRow)
+                controller.loadData()
+            }
+        }
 
-        val libraryController = LibraryRowController(
-            activity = requireActivity(),
-            viewModel = libraryViewModel,
-        )
-        rowsAdapter.add(libraryController.listRow)
-
-        val tgController = TgRowController(
-            activity = requireActivity(),
-            viewModel = tgVideosViewModel,
-        )
-        rowsAdapter.add(tgController.listRow)
-
-        val banggaController = BanggaRowController(
-            activity = requireActivity(),
-            viewModel = banggaViewModel,
-        )
-        rowsAdapter.add(banggaController.listRow)
-
-        rowToControllerMap = listOf(
-            libraryController,
-            tgController,
-            banggaController,
-        ).associateBy { it.listRow }
-
-
-        val gridHeader = HeaderItem(9, "PREFERENCES")
-        val mGridPresenter = GridItemPresenter()
-        val gridRowAdapter = ArrayObjectAdapter(mGridPresenter)
-        gridRowAdapter.add(resources.getString(R.string.personal_settings))
-        rowsAdapter.add(ListRow(gridHeader, gridRowAdapter))
+        val settingsRowController = SettingsRowController(
+            getString(R.string.others),
+            requireActivity()
+        ) {
+            settingsLauncher.launch(Intent(requireContext(), SettingsActivity::class.java))
+        }
+        rowToControllerMap[settingsRowController.listRow] = settingsRowController
+        rowsAdapter.add(settingsRowController.listRow)
 
         adapter = rowsAdapter
     }
@@ -193,6 +229,15 @@ class MainFragment : BrowseSupportFragment() {
         }
     }
 
+    private val settingsLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            RetrofitClient.reset()
+            resetViewModels()
+            initRows()
+            loadRows()
+        }
+    }
+
     private fun updateBackground(uri: String?) {
         val width = mMetrics.widthPixels
         val height = mMetrics.heightPixels
@@ -225,30 +270,9 @@ class MainFragment : BrowseSupportFragment() {
         }
     }
 
-    private inner class GridItemPresenter : Presenter() {
-        override fun onCreateViewHolder(parent: ViewGroup): Presenter.ViewHolder {
-            val view = TextView(parent.context)
-            view.layoutParams = ViewGroup.LayoutParams(GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT)
-            view.isFocusable = true
-            view.isFocusableInTouchMode = true
-            view.setBackgroundColor(ContextCompat.getColor(activity!!, R.color.default_background))
-            view.setTextColor(Color.WHITE)
-            view.gravity = Gravity.CENTER
-            return Presenter.ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(viewHolder: Presenter.ViewHolder, item: Any) {
-            (viewHolder.view as TextView).text = item as String
-        }
-
-        override fun onUnbindViewHolder(viewHolder: Presenter.ViewHolder) {}
-    }
-
     companion object {
         private const val TAG = "MainFragment"
 
         private const val BACKGROUND_UPDATE_DELAY = 300
-        private const val GRID_ITEM_WIDTH = 200
-        private const val GRID_ITEM_HEIGHT = 200
     }
 }

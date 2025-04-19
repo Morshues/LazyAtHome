@@ -9,8 +9,9 @@ import com.morshues.lazyathome.ui.common.IVideoListModel
 import com.morshues.lazyathome.player.IPlayable
 import com.morshues.lazyathome.player.StaticPlayableItem
 
-class LibraryViewModel : ViewModel(), IVideoListModel {
-    private val repository = LibraryRepository()
+class LibraryViewModel(
+    private val repository: LibraryRepository
+) : ViewModel(), IVideoListModel {
     private lateinit var rootList: List<LibraryItem>
     private val _displayList = MutableLiveData<List<LibraryItem>>()
     val displayList: LiveData<List<LibraryItem>> get() = _displayList

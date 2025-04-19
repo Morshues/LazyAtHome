@@ -24,6 +24,7 @@ import androidx.media3.ui.PlayerControlView
 import com.morshues.lazyathome.databinding.ActivityVideoPlayerBinding
 import com.morshues.lazyathome.player.IPlayable
 import com.morshues.lazyathome.player.VideoPlayerLauncherHolder
+import com.morshues.lazyathome.settings.SettingsManager
 import kotlinx.coroutines.launch
 
 class VideoPlayerActivity : ComponentActivity() {
@@ -35,6 +36,8 @@ class VideoPlayerActivity : ComponentActivity() {
 
     private lateinit var prevButton: ImageButton
     private lateinit var nextButton: ImageButton
+
+    private var remoteSeekMs = 5_000L
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         @UnstableApi
@@ -84,11 +87,15 @@ class VideoPlayerActivity : ComponentActivity() {
 
     @OptIn(UnstableApi::class)
     private fun initializePlayer() {
+        val seekButtonsMs = SettingsManager.getButtonSeekStepMs(this)
+        val timeBarSeekMs = SettingsManager.getTimeBarSeekStepMs(this)
+        remoteSeekMs = SettingsManager.getRemoteSeekStepMs(this)
+
         val loadingView = binding.playerView.findViewById<ProgressBar>(androidx.media3.ui.R.id.exo_buffering)
         loadingView.indeterminateTintList = ColorStateList.valueOf(Color.WHITE)
 
         val timeBar = binding.playerView.findViewById<DefaultTimeBar>(androidx.media3.ui.R.id.exo_progress)
-        timeBar.setKeyTimeIncrement(30_000)
+        timeBar.setKeyTimeIncrement(timeBarSeekMs)
 
         nextButton = binding.playerView.findViewById(androidx.media3.ui.R.id.exo_next)
         nextButton.setOnClickListener {
@@ -101,8 +108,8 @@ class VideoPlayerActivity : ComponentActivity() {
         }
 
         player = ExoPlayer.Builder(this)
-            .setSeekBackIncrementMs(120_000)
-            .setSeekForwardIncrementMs(120_000)
+            .setSeekBackIncrementMs(seekButtonsMs)
+            .setSeekForwardIncrementMs(seekButtonsMs)
             .build().apply {
                 addListener(playerListener)
             }
@@ -139,10 +146,10 @@ class VideoPlayerActivity : ComponentActivity() {
                         val position = p.currentPosition
                         val duration = p.duration
                         if (event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
-                            val newPosition = (position - 5_000).coerceAtLeast(0)
+                            val newPosition = (position - remoteSeekMs).coerceAtLeast(0)
                             p.seekTo(newPosition)
                         } else if (event.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-                            val newPosition = (position + 5_000).coerceAtMost(duration)
+                            val newPosition = (position + remoteSeekMs).coerceAtMost(duration)
                             p.seekTo(newPosition)
                         }
                     }

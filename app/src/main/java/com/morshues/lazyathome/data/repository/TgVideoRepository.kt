@@ -1,16 +1,18 @@
 package com.morshues.lazyathome.data.repository
 
+import com.morshues.lazyathome.data.api.ApiService
 import com.morshues.lazyathome.data.model.TgVideoListRequestData
 import com.morshues.lazyathome.data.model.TgVideoItem
-import com.morshues.lazyathome.data.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class TgVideoRepository {
+class TgVideoRepository(
+    private val api: ApiService
+) {
     fun fetchVideoList(onSuccess: (List<TgVideoItem>) -> Unit, onError: (String) -> Unit) {
         val requestBody = TgVideoListRequestData(null)
-        val call = RetrofitClient.apiService.fetchTgVideoList(requestBody)
+        val call = api.fetchTgVideoList(requestBody)
 
         call.enqueue(object : Callback<List<TgVideoItem>> {
             override fun onResponse(call: Call<List<TgVideoItem>>, response: Response<List<TgVideoItem>>) {
