@@ -35,6 +35,7 @@ import com.morshues.lazyathome.data.network.RetrofitClient
 import com.morshues.lazyathome.settings.SettingsManager
 import com.morshues.lazyathome.ui.bangga.BanggaRowController
 import com.morshues.lazyathome.ui.bangga.BanggaViewModel
+import com.morshues.lazyathome.ui.bangga.BanggaViewModelFactory
 import com.morshues.lazyathome.ui.common.BaseRowController
 import com.morshues.lazyathome.ui.common.RowInfo
 import com.morshues.lazyathome.ui.library.LibraryRowController
@@ -60,7 +61,7 @@ class MainFragment : BrowseSupportFragment() {
 
     private lateinit var libraryViewModel: LibraryViewModel
     private lateinit var tgVideosViewModel: TgVideoViewModel
-    private val banggaViewModel: BanggaViewModel by viewModels()
+    private lateinit var banggaViewModel: BanggaViewModel
     private lateinit var allRowInfos: List<RowInfo>
 
     private val rowToControllerMap = mutableMapOf<Row, BaseRowController>()
@@ -133,6 +134,8 @@ class MainFragment : BrowseSupportFragment() {
         libraryViewModel = ViewModelProvider(this, LibraryViewModelFactory(
             service
         ))[LibraryViewModel::class.java]
+        banggaViewModel = ViewModelProvider(this, BanggaViewModelFactory(
+        ))[BanggaViewModel::class.java]
     }
 
     private fun initRows() {
@@ -156,7 +159,7 @@ class MainFragment : BrowseSupportFragment() {
                     getString(R.string.row_bangga),
                     requireActivity(),
                     banggaViewModel,
-                    )
+                )
             },
         )
     }
