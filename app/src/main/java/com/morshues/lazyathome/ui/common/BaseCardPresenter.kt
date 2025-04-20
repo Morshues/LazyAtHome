@@ -27,15 +27,20 @@ abstract class BaseCardPresenter : Presenter() {
                 updateCardBackgroundColor(this, selected)
                 super.setSelected(selected)
             }
+        }.apply {
+            isFocusable = true
+            isFocusableInTouchMode = true
+            updateCardBackgroundColor(this, false)
         }
 
-        cardView.isFocusable = true
-        cardView.isFocusableInTouchMode = true
-        updateCardBackgroundColor(cardView, false)
         return ViewHolder(cardView)
     }
 
-    override fun onBindViewHolder(viewHolder: ViewHolder, item: Any) {
+    override fun onBindViewHolder(viewHolder: ViewHolder, item: Any?) {
+        if (item == null) {
+            return
+        }
+
         Log.d(TAG, "onBindViewHolder")
         val cardView = viewHolder.view as ImageCardView
 
@@ -71,7 +76,7 @@ abstract class BaseCardPresenter : Presenter() {
     companion object {
         private const val TAG = "BaseCardPresenter"
 
-        const val CARD_WIDTH = 313
-        const val CARD_HEIGHT = 176
+        const val CARD_WIDTH = 384
+        const val CARD_HEIGHT = 216
     }
 }
