@@ -1,5 +1,6 @@
 package com.morshues.lazyathome.ui.bangga
 
+import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.leanback.widget.ArrayObjectAdapter
 import androidx.leanback.widget.HeaderItem
@@ -30,6 +31,12 @@ class BanggaRowController(
             }
             uiList.addAll(itemList)
             rowAdapter.setItems(uiList, null)
+        }
+        viewModel.errorMessage.observe(activity) { errMsg ->
+            errMsg?.run {
+                Toast.makeText(activity, "[Bangga API] $errMsg", Toast.LENGTH_LONG)
+                    .show()
+            }
         }
     }
 

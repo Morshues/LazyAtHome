@@ -1,5 +1,6 @@
 package com.morshues.lazyathome.ui.tg
 
+import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.leanback.widget.ArrayObjectAdapter
 import androidx.leanback.widget.HeaderItem
@@ -25,7 +26,10 @@ class TgVideoRowController(
                 rowAdapter.add(tgItem)
             }
         }
-
+        viewModel.errorMessage.observe(activity) { errMsg ->
+            Toast.makeText(activity, "[TgVideo API] $errMsg", Toast.LENGTH_LONG)
+                .show()
+        }
     }
 
     override fun loadData() {

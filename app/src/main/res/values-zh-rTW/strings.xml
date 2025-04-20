@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="others">其他</string>
+    <string name="settings">設定</string>
+
+    <string name="row_library">Library</string>
+    <string name="row_tg_video">Tg Video</string>
+    <string name="row_bangga">Bangga</string>
+    <string name="row_settings">設定</string>
+
+    <string name="settings_pref_server_path_title">伺服器路徑</string>
+    <string name="settings_pref_row_order_title">Row 排序</string>
+    <string name="settings_pref_row_order_summary">調整顯示的順序</string>
+    <string name="settings_pref_remote_seek_title">遙控器快轉時間 (秒)</string>
+    <string name="settings_pref_time_bar_seek_title">TimeBar快轉時間 (秒)</string>
+    <string name="settings_pref_button_seek_title">介面按鈕快轉時間 (秒)</string>
+
+    <!-- Preference Titles -->
+    <string name="row_order_instructions">
+        使用說明：\n
+        - 上下鍵：切換 Row\n
+        - 左右鍵：調整順序\n
+        - OK鍵：啟用或停用 Row\n
+        - 返回鍵：儲存設定
+    </string>
+</resources>

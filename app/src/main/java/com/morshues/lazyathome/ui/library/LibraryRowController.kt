@@ -1,5 +1,6 @@
 package com.morshues.lazyathome.ui.library
 
+import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.leanback.widget.ArrayObjectAdapter
 import androidx.leanback.widget.HeaderItem
@@ -28,6 +29,10 @@ class LibraryRowController(
             }
             uiList.addAll(itemList.reversed())
             rowAdapter.setItems(uiList, null)
+        }
+        viewModel.errorMessage.observe(activity) { errMsg ->
+            Toast.makeText(activity, "[Library API] $errMsg", Toast.LENGTH_LONG)
+                .show()
         }
     }
 
