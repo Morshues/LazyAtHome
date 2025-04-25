@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ImageView
+            android:id="@+id/dragAnchor"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="start|top"
+            android:importantForAccessibility="no"
+            android:visibility="gone"
+            android:src="@drawable/ic_anchor" />
+
+        <FrameLayout
+            android:id="@+id/controlPanel"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/controlModeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="16dp"
+                android:padding="8dp"
+                android:background="#AA000000"
+                android:textColor="#FFFFFF"
+                tools:text="@string/link_page_mode_drag_scroll" />
+        </FrameLayout>
+    </FrameLayout>
+</layout>

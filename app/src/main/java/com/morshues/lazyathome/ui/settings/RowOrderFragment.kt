@@ -17,6 +17,7 @@ import com.morshues.lazyathome.settings.SettingsManager
 import com.morshues.lazyathome.ui.bangga.BanggaRowController
 import com.morshues.lazyathome.ui.library.LibraryRowController
 import com.morshues.lazyathome.ui.tg.TgVideoRowController
+import com.morshues.lazyathome.ui.linkpage.LinkPageRowController
 import java.util.Collections
 
 class RowOrderFragment : Fragment() {
@@ -24,12 +25,6 @@ class RowOrderFragment : Fragment() {
     private lateinit var rows: MutableList<RowSetting>
     private lateinit var adapter: ArrayAdapter<RowSetting>
     private lateinit var listView: ListView
-
-    private val allRowOptions = listOf(
-        RowSetting(BanggaRowController.ID, true),
-        RowSetting(LibraryRowController.ID, false),
-        RowSetting(TgVideoRowController.ID, false),
-    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,7 +39,7 @@ class RowOrderFragment : Fragment() {
         }
 
         val instructions = TextView(context).apply {
-            text = context.getString(R.string.row_order_instructions)
+            text = context.getString(R.string.settings_row_order_instructions)
             setTextColor(Color.WHITE)
             textSize = 18f
             setPadding(24, 24, 24, 24)
@@ -56,7 +51,7 @@ class RowOrderFragment : Fragment() {
         layout.addView(listView)
 
         rows = SettingsManager.getRowOrderWithEnabled(context).ifEmpty {
-            allRowOptions.toMutableList()
+            DEFAULT_ROW_OPTIONS.toMutableList()
         }
 
         adapter = object : ArrayAdapter<RowSetting>(
@@ -71,6 +66,7 @@ class RowOrderFragment : Fragment() {
                     LibraryRowController.ID -> getString(R.string.row_library)
                     TgVideoRowController.ID -> getString(R.string.row_tg_video)
                     BanggaRowController.ID -> getString(R.string.row_bangga)
+                    LinkPageRowController.ID -> getString(R.string.row_link_page)
                     else -> row.id
                 }
                 view.setBackgroundResource(R.drawable.row_item_background)
@@ -149,5 +145,14 @@ class RowOrderFragment : Fragment() {
 
     private fun saveSettings() {
         SettingsManager.saveRowOrderAndEnabled(requireContext(), rows)
+    }
+
+    companion object {
+        val DEFAULT_ROW_OPTIONS = listOf(
+            RowSetting(BanggaRowController.ID, true),
+            RowSetting(LibraryRowController.ID, false),
+            RowSetting(TgVideoRowController.ID, false),
+            RowSetting(LinkPageRowController.ID, false),
+        )
     }
 }

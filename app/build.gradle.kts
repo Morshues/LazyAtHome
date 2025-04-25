@@ -13,8 +13,8 @@ android {
         applicationId = "com.morshues.lazyathome"
         minSdk = 24
         targetSdk = 35
-        versionCode = 16
-        versionName = "0.4.4"
+        versionCode = 17
+        versionName = "0.5.0"
 
         buildConfigField("String", "BASE_URL", "\"http://192.168.1.126:3000/\"")
     }
@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.androidx.leanback.preference)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.webkit)
     implementation(libs.glide)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)

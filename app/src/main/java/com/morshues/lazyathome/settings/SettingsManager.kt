@@ -3,9 +3,7 @@ package com.morshues.lazyathome.settings
 import android.content.Context
 import androidx.preference.PreferenceManager
 import com.morshues.lazyathome.BuildConfig
-import com.morshues.lazyathome.ui.bangga.BanggaRowController
-import com.morshues.lazyathome.ui.library.LibraryRowController
-import com.morshues.lazyathome.ui.tg.TgVideoRowController
+import com.morshues.lazyathome.ui.settings.RowOrderFragment.Companion.DEFAULT_ROW_OPTIONS
 
 object SettingsManager {
     private const val DEFAULT_SERVER_PATH = BuildConfig.BASE_URL
@@ -14,12 +12,6 @@ object SettingsManager {
         return PreferenceManager.getDefaultSharedPreferences(context)
             .getString("server_path", DEFAULT_SERVER_PATH) ?: DEFAULT_SERVER_PATH
     }
-
-    private val DEFAULT_ROW_OPTIONS = listOf(
-        RowSetting(BanggaRowController.ID, true),
-        RowSetting(LibraryRowController.ID, false),
-        RowSetting(TgVideoRowController.ID, false),
-    )
 
     fun getRowOrderWithEnabled(context: Context): MutableList<RowSetting> {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
@@ -68,6 +60,11 @@ object SettingsManager {
     fun getButtonSeekStepMs(context: Context): Long {
         return 1_000L * PreferenceManager.getDefaultSharedPreferences(context)
             .getInt("button_seek_step_ms", 120)
+    }
+
+    fun getPageScrollSpeed(context: Context): Float {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+            .getInt("link_page_scroll_speed", 100).toFloat()
     }
 
 }

@@ -25,7 +25,6 @@ import androidx.leanback.widget.RowPresenter
 import androidx.core.content.ContextCompat
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 
 import com.bumptech.glide.Glide
@@ -46,6 +45,9 @@ import com.morshues.lazyathome.ui.settings.SettingsRowController
 import com.morshues.lazyathome.ui.tg.TgVideoRowController
 import com.morshues.lazyathome.ui.tg.TgVideoViewModel
 import com.morshues.lazyathome.ui.tg.TgVideoViewModelFactory
+import com.morshues.lazyathome.ui.linkpage.LinkPageRowController
+import com.morshues.lazyathome.ui.linkpage.LinkPageViewModel
+import com.morshues.lazyathome.ui.linkpage.LinkPageViewModelFactory
 
 /**
  * Loads a grid of cards with movies to browse.
@@ -62,6 +64,7 @@ class MainFragment : BrowseSupportFragment() {
     private lateinit var libraryViewModel: LibraryViewModel
     private lateinit var tgVideosViewModel: TgVideoViewModel
     private lateinit var banggaViewModel: BanggaViewModel
+    private lateinit var linkPageViewModel: LinkPageViewModel
     private lateinit var allRowInfos: List<RowInfo>
 
     private val rowToControllerMap = mutableMapOf<Row, BaseRowController>()
@@ -136,6 +139,9 @@ class MainFragment : BrowseSupportFragment() {
         ))[LibraryViewModel::class.java]
         banggaViewModel = ViewModelProvider(this, BanggaViewModelFactory(
         ))[BanggaViewModel::class.java]
+        linkPageViewModel = ViewModelProvider(this, LinkPageViewModelFactory(
+            service
+        ))[LinkPageViewModel::class.java]
     }
 
     private fun initRows() {
@@ -161,6 +167,13 @@ class MainFragment : BrowseSupportFragment() {
                     banggaViewModel,
                 )
             },
+            RowInfo(LinkPageRowController.ID) {
+                LinkPageRowController(
+                    getString(R.string.row_link_page),
+                    requireActivity(),
+                    linkPageViewModel,
+                )
+            },
         )
     }
 
@@ -181,7 +194,7 @@ class MainFragment : BrowseSupportFragment() {
         }
 
         val settingsRowController = SettingsRowController(
-            getString(R.string.others),
+            getString(R.string.row_others),
             requireActivity()
         ) {
             settingsLauncher.launch(Intent(requireContext(), SettingsActivity::class.java))

@@ -34,6 +34,9 @@
             android:name=".ui.common.VideoPlayerActivity"
             android:exported="false" />
 
+        <activity android:name=".ui.linkpage.LinkPageActivity"
+            android:exported="false" />
+
         <activity
             android:name=".ui.settings.SettingsActivity"
             android:exported="false"/>

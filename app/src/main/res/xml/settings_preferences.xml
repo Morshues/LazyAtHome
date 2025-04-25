@@ -2,40 +2,71 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <EditTextPreference
-        android:key="server_path"
-        android:title="@string/settings_pref_server_path_title"
-        android:defaultValue="http://192.168.1.126:3000/"
-        android:singleLine="true"
-        android:selectAllOnFocus="true" />
+
+    <PreferenceCategory
+        android:title="@string/settings_pref_category_general">
+
+        <EditTextPreference
+            android:key="server_path"
+            android:title="@string/settings_pref_server_path_title"
+            android:defaultValue="http://192.168.1.126:3000/"
+            android:singleLine="true"
+            android:selectAllOnFocus="true" />
+
+        <Preference
+            android:key="row_order_editor"
+            android:title="@string/settings_pref_row_order_title"
+            android:summary="@string/settings_pref_row_order_summary" />
+
+    </PreferenceCategory>
 
     <Preference
-        android:key="row_order_editor"
-        android:title="@string/settings_pref_row_order_title"
-        android:summary="@string/settings_pref_row_order_summary" />
+        android:layout="@layout/preference_divider"
+        android:selectable="false" />
 
-    <SeekBarPreference
-        android:key="remote_seek_step_ms"
-        android:title="@string/settings_pref_remote_seek_title"
-        android:defaultValue="5"
-        android:min="1"
-        android:max="120"
-        app:seekBarIncrement="1" />
+    <PreferenceCategory
+        android:title="@string/settings_pref_category_player">
 
-    <SeekBarPreference
-        android:key="time_bar_seek_step_ms"
-        android:title="@string/settings_pref_time_bar_seek_title"
-        android:defaultValue="30"
-        android:min="1"
-        android:max="120"
-        app:seekBarIncrement="1" />
+        <SeekBarPreference
+            android:key="remote_seek_step_ms"
+            android:title="@string/settings_pref_remote_seek_title"
+            android:defaultValue="5"
+            android:min="1"
+            android:max="120"
+            app:seekBarIncrement="1" />
 
-    <SeekBarPreference
-        android:key="button_seek_step_ms"
-        android:title="@string/settings_pref_button_seek_title"
-        android:defaultValue="120"
-        android:min="1"
-        android:max="120"
-        app:seekBarIncrement="1" />
+        <SeekBarPreference
+            android:key="time_bar_seek_step_ms"
+            android:title="@string/settings_pref_time_bar_seek_title"
+            android:defaultValue="30"
+            android:min="1"
+            android:max="120"
+            app:seekBarIncrement="1" />
 
+        <SeekBarPreference
+            android:key="button_seek_step_ms"
+            android:title="@string/settings_pref_button_seek_title"
+            android:defaultValue="120"
+            android:min="1"
+            android:max="120"
+            app:seekBarIncrement="1" />
+
+    </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false" />
+
+    <PreferenceCategory
+        android:title="@string/settings_pref_category_link_page">
+
+        <SeekBarPreference
+            android:key="link_page_scroll_speed"
+            android:title="@string/settings_pref_link_page_scroll_speed"
+            android:defaultValue="100"
+            android:min="20"
+            android:max="400"
+            app:seekBarIncrement="10" />
+
+    </PreferenceCategory>
 </PreferenceScreen>
