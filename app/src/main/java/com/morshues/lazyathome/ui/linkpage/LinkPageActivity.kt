@@ -179,30 +179,16 @@ class LinkPageActivity : ComponentActivity() {
             dragCenterX.toFloat(), dragCenterY.toFloat(), 0
         )
         webView.dispatchTouchEvent(touchDown)
+        touchDown.recycle()
 
-        val steps = 5
-        for (i in 1..steps) {
-            val moveX = dragCenterX + (i.toFloat() / steps) * deltaX
-            val moveY = dragCenterY + (i.toFloat() / steps) * deltaY
-            val moveEvent = MotionEvent.obtain(
-                downTime,
-                downTime + i * 10,
-                MotionEvent.ACTION_MOVE,
-                moveX, moveY, 0
-            )
-            webView.dispatchTouchEvent(moveEvent)
-            moveEvent.recycle()
-        }
-
-        val touchUp = MotionEvent.obtain(
-            downTime, downTime + steps * 10,
-            MotionEvent.ACTION_UP,
+        val moveEvent = MotionEvent.obtain(
+            downTime,
+            downTime + 10,
+            MotionEvent.ACTION_MOVE,
             endX, endY, 0
         )
-        webView.dispatchTouchEvent(touchUp)
-
-        touchDown.recycle()
-        touchUp.recycle()
+        webView.dispatchTouchEvent(moveEvent)
+        moveEvent.recycle()
     }
 
     private fun updateDragAnchor() {
