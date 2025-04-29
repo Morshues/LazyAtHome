@@ -14,7 +14,7 @@ class TgVideoRowController(
     private val activity: FragmentActivity,
     private val viewModel: TgVideoViewModel,
 ) : BaseRowController(viewModel) {
-    private val cardPresenter = TgVideoCardPresenter()
+    private val cardPresenter = bindClick(TgVideoCardPresenter())
     private val rowAdapter = ArrayObjectAdapter(cardPresenter)
     private val header = HeaderItem(0, title)
 

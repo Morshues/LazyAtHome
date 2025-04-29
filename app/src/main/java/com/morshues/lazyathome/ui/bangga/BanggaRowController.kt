@@ -17,7 +17,7 @@ class BanggaRowController(
     private val activity: FragmentActivity,
     private val viewModel: BanggaViewModel,
 ) : BaseRowController(viewModel) {
-    private val cardPresenter = BanggaCardPresenter()
+    private val cardPresenter = bindClick(BanggaCardPresenter())
     private val rowAdapter = ArrayObjectAdapter(cardPresenter)
     private val header = HeaderItem(0, title)
 

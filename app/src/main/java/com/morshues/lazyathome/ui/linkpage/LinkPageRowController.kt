@@ -1,5 +1,6 @@
 package com.morshues.lazyathome.ui.linkpage
 
+import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.leanback.widget.ArrayObjectAdapter
@@ -13,7 +14,7 @@ class LinkPageRowController(
     private val activity: FragmentActivity,
     private val viewModel: LinkPageViewModel,
 ) : BaseRowController() {
-    private val cardPresenter = LinkPageCardPresenter()
+    private val cardPresenter = bindClick(LinkPageCardPresenter())
     private val rowAdapter = ArrayObjectAdapter(cardPresenter)
     private val header = HeaderItem(0, title)
 
@@ -26,8 +27,10 @@ class LinkPageRowController(
             rowAdapter.setItems(uiList, null)
         }
         viewModel.errorMessage.observe(activity) { errMsg ->
-            Toast.makeText(activity, "[LinkPage API] $errMsg", Toast.LENGTH_LONG)
-                .show()
+            if (errMsg.isNotBlank()) {
+                Toast.makeText(activity, "[LinkPage API] $errMsg", Toast.LENGTH_LONG)
+                    .show()
+            }
         }
     }
 
@@ -43,8 +46,21 @@ class LinkPageRowController(
         }
     }
 
+    override fun onLongClick(item: Any, view: View): Boolean {
+        if (item is LinkPage) {
+            showPopupMenu(item, view)
+        }
+        return true
+    }
+
     override fun getBackgroundUri(item: Any?): String? {
         return null
+    }
+
+    override fun deleteItem(item: Any) {
+        if (item is LinkPage) {
+            viewModel.deleteItem(item)
+        }
     }
 
     companion object {

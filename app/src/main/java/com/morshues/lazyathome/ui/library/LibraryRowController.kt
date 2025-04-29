@@ -15,7 +15,7 @@ class LibraryRowController(
     private val activity: FragmentActivity,
     private val viewModel: LibraryViewModel,
 ) : BaseRowController(viewModel) {
-    private val cardPresenter = LibraryCardPresenter()
+    private val cardPresenter = bindClick(LibraryCardPresenter())
     private val rowAdapter = ArrayObjectAdapter(cardPresenter)
     private val header = HeaderItem(0, title)
 

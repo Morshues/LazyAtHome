@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Common -->
+    <string name="edit">編輯</string>
+    <string name="delete">刪除</string>
+
+    <!-- Rows -->
     <string name="row_library">Library</string>
     <string name="row_tg_video">Tg Video</string>
     <string name="row_bangga">Bangga</string>
     <string name="row_link_page">網頁</string>
     <string name="row_others">其他</string>
 
+    <!-- Link Page -->
     <string name="link_page_mode_drag_scroll">捲動模式</string>
     <string name="link_page_mode_change_drag_pos">更變捲動位置</string>
     <string name="link_page_mode_zoom">縮放模式</string>

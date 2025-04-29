@@ -17,7 +17,6 @@ import androidx.leanback.app.BackgroundManager
 import androidx.leanback.app.BrowseSupportFragment
 import androidx.leanback.widget.ArrayObjectAdapter
 import androidx.leanback.widget.ListRowPresenter
-import androidx.leanback.widget.OnItemViewClickedListener
 import androidx.leanback.widget.OnItemViewSelectedListener
 import androidx.leanback.widget.Presenter
 import androidx.leanback.widget.Row
@@ -211,25 +210,7 @@ class MainFragment : BrowseSupportFragment() {
                 .show()
         }
 
-        onItemViewClickedListener = ItemViewClickedListener()
         onItemViewSelectedListener = ItemViewSelectedListener()
-    }
-
-    private inner class ItemViewClickedListener : OnItemViewClickedListener {
-        override fun onItemClicked(
-            itemViewHolder: Presenter.ViewHolder,
-            item: Any,
-            rowViewHolder: RowPresenter.ViewHolder,
-            row: Row
-        ) {
-            rowToControllerMap[row]?.onClick(item)
-                ?: run {
-                    if (item is String) {
-                        Log.d(TAG, "Item: $item")
-                        Toast.makeText(requireContext(), item, Toast.LENGTH_SHORT).show()
-                    }
-                }
-        }
     }
 
     private inner class ItemViewSelectedListener : OnItemViewSelectedListener {

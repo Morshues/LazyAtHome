@@ -2,6 +2,7 @@ package com.morshues.lazyathome.ui.common
 
 import android.graphics.drawable.Drawable
 import android.util.Log
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.leanback.widget.ImageCardView
@@ -13,6 +14,9 @@ abstract class BaseCardPresenter : Presenter() {
     private var mDefaultCardImage: Drawable? = null
     private var sSelectedBackgroundColor: Int by Delegates.notNull()
     private var sDefaultBackgroundColor: Int by Delegates.notNull()
+
+    var onItemClick: ((Any) -> Unit)? = null
+    var onItemLongClick: ((Any, View) -> Boolean)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
         Log.d(TAG, "onCreateViewHolder")
@@ -43,6 +47,14 @@ abstract class BaseCardPresenter : Presenter() {
 
         Log.d(TAG, "onBindViewHolder")
         val cardView = viewHolder.view as ImageCardView
+
+        cardView.setOnClickListener {
+            onItemClick?.invoke(item)
+        }
+
+        cardView.setOnLongClickListener {
+            return@setOnLongClickListener onItemLongClick?.invoke(item, cardView) ?: false
+        }
 
         if (item is GoBackUIItem) {
             cardView.titleText = "← Go Back"

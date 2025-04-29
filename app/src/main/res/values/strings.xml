@@ -2,12 +2,18 @@
     <string name="app_name" translatable="false">LazyAtHome</string>
     <string name="browse_title" translatable="false">LazyAtHome</string>
 
+    <!-- Common -->
+    <string name="edit">編輯</string>
+    <string name="delete">刪除</string>
+
+    <!-- Rows -->
     <string name="row_library">Library</string>
     <string name="row_tg_video">Tg Video</string>
     <string name="row_bangga">Bangga</string>
     <string name="row_link_page">Pages</string>
     <string name="row_others">Others</string>
 
+    <!-- Link Page -->
     <string name="link_page_mode_drag_scroll">Mode: Scroll</string>
     <string name="link_page_mode_change_drag_pos">Mode: Change Drag Position</string>
     <string name="link_page_mode_zoom">Mode: Zoom</string>
