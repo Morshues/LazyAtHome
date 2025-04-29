@@ -65,7 +65,7 @@
             android:title="@string/settings_pref_link_page_scroll_speed"
             android:defaultValue="100"
             android:min="20"
-            android:max="400"
+            android:max="1000"
             app:seekBarIncrement="10" />
 
     </PreferenceCategory>

@@ -24,7 +24,7 @@ class LinkPageActivity : ComponentActivity() {
     private lateinit var binding: ActivityLinkPageBinding
 
     private val keyDownTimes = mutableMapOf<Int, Long>()
-    private val longClickThreshold = 300L
+    private val longClickThreshold = 500L
 
     private var dragCenterX = 0f
     private var dragCenterY = 0f

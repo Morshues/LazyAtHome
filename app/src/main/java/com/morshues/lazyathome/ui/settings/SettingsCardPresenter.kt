@@ -9,6 +9,8 @@ import androidx.leanback.widget.Presenter
 import com.morshues.lazyathome.R
 
 class SettingsCardPresenter : Presenter() {
+    var onItemClick: ((Any) -> Unit)? = null
+
     override fun onCreateViewHolder(parent: ViewGroup): ViewHolder {
         val view = TextView(parent.context)
         view.layoutParams = ViewGroup.LayoutParams(GRID_ITEM_WIDTH, GRID_ITEM_HEIGHT)
@@ -21,6 +23,14 @@ class SettingsCardPresenter : Presenter() {
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, item: Any?) {
+        if (item == null) {
+            return
+        }
+
+        viewHolder.view.setOnClickListener {
+            onItemClick?.invoke(item)
+        }
+        
         if (item is SettingsItem) {
             (viewHolder.view as TextView).text = item.title
         }

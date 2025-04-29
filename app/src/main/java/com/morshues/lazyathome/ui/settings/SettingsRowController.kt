@@ -12,7 +12,9 @@ class SettingsRowController(
     activity: FragmentActivity,
     private val startSettings: () -> Unit,
 ) : BaseRowController() {
-    private val cardPresenter = SettingsCardPresenter()
+    private val cardPresenter = SettingsCardPresenter().apply {
+        onItemClick = { item -> onClick(item) }
+    }
     private val rowAdapter = ArrayObjectAdapter(cardPresenter)
     private val header = HeaderItem(999, title)
 
