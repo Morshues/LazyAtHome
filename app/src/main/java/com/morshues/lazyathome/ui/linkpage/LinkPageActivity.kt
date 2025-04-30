@@ -118,6 +118,12 @@ class LinkPageActivity : ComponentActivity() {
 
     private fun handleHover(keyCode: Int, repeatCount: Int) {
         when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_CENTER -> {
+                if (repeatCount == 1) {
+                    showControlPanel()
+                    keyDownTimes.remove(keyCode)
+                }
+            }
             KeyEvent.KEYCODE_DPAD_UP -> handleDirectionalKey(Direction.UP)
             KeyEvent.KEYCODE_DPAD_DOWN -> handleDirectionalKey(Direction.DOWN)
             KeyEvent.KEYCODE_DPAD_LEFT -> handleDirectionalKey(Direction.LEFT)

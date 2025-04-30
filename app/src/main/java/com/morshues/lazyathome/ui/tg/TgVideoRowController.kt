@@ -1,5 +1,6 @@
 package com.morshues.lazyathome.ui.tg
 
+import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.leanback.widget.ArrayObjectAdapter
@@ -22,13 +23,13 @@ class TgVideoRowController(
 
     init {
         viewModel.dataList.observe(activity) { itemList ->
-            for (tgItem in itemList) {
-                rowAdapter.add(tgItem)
-            }
+            rowAdapter.setItems(itemList, null)
         }
         viewModel.errorMessage.observe(activity) { errMsg ->
-            Toast.makeText(activity, "[TgVideo API] $errMsg", Toast.LENGTH_LONG)
-                .show()
+            if (errMsg.isNotBlank()) {
+                Toast.makeText(activity, "[TgVideo API] $errMsg", Toast.LENGTH_LONG)
+                    .show()
+            }
         }
     }
 
@@ -42,11 +43,24 @@ class TgVideoRowController(
         }
     }
 
+    override fun onLongClick(item: Any, view: View): Boolean {
+        if (item is TgVideoItem) {
+            showPopupMenu(item, view)
+        }
+        return true
+    }
+
     override fun getBackgroundUri(item: Any?): String? {
         if (item is TgVideoItem) {
             return item.thumbnail
         }
         return null
+    }
+
+    override fun deleteItem(item: Any) {
+        if (item is TgVideoItem) {
+            viewModel.deleteItem(item)
+        }
     }
 
     companion object {

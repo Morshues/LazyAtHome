@@ -1,5 +1,5 @@
 package com.morshues.lazyathome.data.model
 
-data class LinkPageDeleteRequestData(
+data class DeleteRequestData(
     val id: String,
 )

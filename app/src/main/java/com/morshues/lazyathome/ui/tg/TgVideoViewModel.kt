@@ -3,11 +3,13 @@ package com.morshues.lazyathome.ui.tg
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.morshues.lazyathome.data.model.TgVideoItem
 import com.morshues.lazyathome.data.repository.TgVideoRepository
 import com.morshues.lazyathome.ui.common.IVideoListModel
 import com.morshues.lazyathome.player.IPlayable
 import com.morshues.lazyathome.player.StaticPlayableItem
+import kotlinx.coroutines.launch
 
 class TgVideoViewModel(
     private val repository: TgVideoRepository
@@ -23,6 +25,20 @@ class TgVideoViewModel(
             onSuccess = { data -> _dataList.postValue(data) },
             onError = { error -> _errorMessage.postValue(error) }
         )
+    }
+
+    fun deleteItem(item: TgVideoItem) {
+        viewModelScope.launch {
+            _errorMessage.value = ""
+            val result = repository.deleteTgItem(item.id)
+            if (result) {
+                val currentList = _dataList.value.orEmpty()
+                val updatedList = currentList.filterNot { it.id == item.id }
+                _dataList.postValue(updatedList)
+            } else {
+                _errorMessage.postValue("Delete Failed")
+            }
+        }
     }
 
     override fun getPlayableList(): List<IPlayable> {

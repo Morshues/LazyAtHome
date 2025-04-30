@@ -2,7 +2,7 @@ package com.morshues.lazyathome.data.repository
 
 import com.morshues.lazyathome.data.api.ApiService
 import com.morshues.lazyathome.data.model.LinkPage
-import com.morshues.lazyathome.data.model.LinkPageDeleteRequestData
+import com.morshues.lazyathome.data.model.DeleteRequestData
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -32,7 +32,7 @@ class LinkPageRepository(
 
     suspend fun deleteLinkPage(id: String): Boolean {
         return try {
-            val requestBody = LinkPageDeleteRequestData(id)
+            val requestBody = DeleteRequestData(id)
             api.deleteLinkPageItem(requestBody)
             true
         } catch (e: Exception) {

@@ -1,6 +1,7 @@
 package com.morshues.lazyathome.data.repository
 
 import com.morshues.lazyathome.data.api.ApiService
+import com.morshues.lazyathome.data.model.DeleteRequestData
 import com.morshues.lazyathome.data.model.TgVideoListRequestData
 import com.morshues.lazyathome.data.model.TgVideoItem
 import retrofit2.Call
@@ -29,5 +30,16 @@ class TgVideoRepository(
                 onError("Request Failed: ${t.message}")
             }
         })
+    }
+
+    suspend fun deleteTgItem(id: String): Boolean {
+        return try {
+            val requestBody = DeleteRequestData(id)
+            api.deleteTgItem(requestBody)
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
 }
