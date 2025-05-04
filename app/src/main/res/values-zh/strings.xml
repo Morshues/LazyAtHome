@@ -15,6 +15,7 @@
     <string name="link_page_mode_drag_scroll">捲動模式</string>
     <string name="link_page_mode_change_drag_pos">更變捲動位置</string>
     <string name="link_page_mode_zoom">縮放模式</string>
+    <string name="link_page_mode_extra">其他功能</string>
 
     <!-- Preference Settings -->
     <string name="settings">設定</string>

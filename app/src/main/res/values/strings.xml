@@ -17,6 +17,7 @@
     <string name="link_page_mode_drag_scroll">Mode: Scroll</string>
     <string name="link_page_mode_change_drag_pos">Mode: Change Drag Position</string>
     <string name="link_page_mode_zoom">Mode: Zoom</string>
+    <string name="link_page_mode_extra">Mode: Extra</string>
 
     <!-- Preference Settings -->
     <string name="settings">Settings</string>

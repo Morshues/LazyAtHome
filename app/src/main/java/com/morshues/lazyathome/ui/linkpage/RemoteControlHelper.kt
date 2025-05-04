@@ -10,6 +10,7 @@ import android.view.View
 import android.webkit.WebView
 import android.widget.FrameLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.view.isVisible
 import com.morshues.lazyathome.R
 import com.morshues.lazyathome.settings.SettingsManager
@@ -37,6 +38,34 @@ class RemoteControlHelper(
     private var dragCenterY = 0f
     private var currentMode = RemoteMode.DRAG_SCROLL
     private var currentZoom = 1.0f
+
+    init {
+        webView.evaluateJavascript("""
+            if (typeof window.__invertSetup === 'undefined') {
+                window.__invertSetup = true;
+                window.__invertState = false;
+                window.__invertStyle = document.createElement('style');
+                document.head.appendChild(window.__invertStyle);
+        
+                window.toggleInvert = function() {
+                    window.__invertState = !window.__invertState;
+                    if (window.__invertState) {
+                        window.__invertStyle.innerHTML = `
+                            html {
+                                filter: invert(1) hue-rotate(180deg) !important;
+                                background: #000 !important;
+                            }
+                            img, video, picture, iframe {
+                                filter: invert(1) hue-rotate(180deg) !important;
+                            }
+                        `;
+                    } else {
+                        window.__invertStyle.innerHTML = '';
+                    }
+                };
+            }
+        """.trimIndent(), null)
+    }
 
     fun onKeyEvent(event: KeyEvent): Boolean {
         when (event.keyCode) {
@@ -155,6 +184,18 @@ class RemoteControlHelper(
                 webView.evaluateJavascript("document.body.style.zoom = '${currentZoom}'", null)
                 // webView.setInitialScale((currentZoom * 100).toInt())
             }
+            RemoteMode.EXTRA -> handleExtraMode(direction)
+        }
+    }
+
+    private fun handleExtraMode(direction: Direction) {
+        when (direction) {
+            Direction.UP -> {
+                webView.evaluateJavascript("""
+                    window.toggleInvert()
+                """.trimIndent(), null)
+            }
+            else -> Toast.makeText(contextRef.get(), "No function", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -163,6 +204,7 @@ class RemoteControlHelper(
             RemoteMode.DRAG_SCROLL -> R.string.link_page_mode_drag_scroll
             RemoteMode.CHANGE_DRAG_POSITION -> R.string.link_page_mode_change_drag_pos
             RemoteMode.ZOOM_MODE -> R.string.link_page_mode_zoom
+            RemoteMode.EXTRA -> R.string.link_page_mode_extra
         }
         controlModeText.text = contextRef.get()?.getString(resId)
         dragAnchor.isVisible = (currentMode == RemoteMode.CHANGE_DRAG_POSITION)
@@ -231,5 +273,5 @@ class RemoteControlHelper(
     }
 
     enum class Direction { UP, DOWN, LEFT, RIGHT }
-    enum class RemoteMode { DRAG_SCROLL, CHANGE_DRAG_POSITION, ZOOM_MODE }
+    enum class RemoteMode { DRAG_SCROLL, CHANGE_DRAG_POSITION, ZOOM_MODE, EXTRA }
 }
