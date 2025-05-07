@@ -12,11 +12,13 @@ class LibraryCardPresenter : BaseCardPresenter() {
             cardView.contentText = item.name
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT)
             if (item is LibraryItem.VideoItem) {
-                Glide.with(viewHolder.view.context)
-                    .load(item.src)
-                    .centerCrop()
-                    .error(getDefaultCardImage())
-                    .into(cardView.mainImageView)
+                cardView.mainImageView?.let { view ->
+                    Glide.with(viewHolder.view.context)
+                        .load(item.src)
+                        .centerCrop()
+                        .error(getDefaultCardImage())
+                        .into(view)
+                }
             }
         }
     }

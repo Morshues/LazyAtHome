@@ -11,11 +11,13 @@ class BanggaCardPresenter : BaseCardPresenter() {
             cardView.titleText = item.title
             cardView.contentText = item.info
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT)
-            Glide.with(viewHolder.view.context)
-                .load(item.image.url)
-                .centerCrop()
-                .error(getDefaultCardImage())
-                .into(cardView.mainImageView)
+            cardView.mainImageView?.let { view ->
+                Glide.with(viewHolder.view.context)
+                    .load(item.image.url)
+                    .centerCrop()
+                    .error(getDefaultCardImage())
+                    .into(view)
+            }
         }
     }
 }

@@ -49,7 +49,6 @@ dependencies {
     implementation(libs.androidx.leanback.preference)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
-    implementation(libs.androidx.webkit)
     implementation(libs.glide)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)

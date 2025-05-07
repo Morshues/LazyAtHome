@@ -1,16 +1,14 @@
 [versions]
-agp = "8.6.0"
+agp = "8.9.2"
 artifactid = "version"
 fragmentKtx = "1.8.6"
-kotlin = "1.9.0"
-coreKtx = "1.13.1"
-leanback = "1.0.0"
+kotlin = "2.1.0"
+coreKtx = "1.16.0"
+leanback = "1.2.0"
 glide = "4.11.0"
-leanbackPreference = "1.2.0-beta01"
-media3Exoplayer = "1.5.1"
+leanbackPreference = "1.2.0"
+media3Exoplayer = "1.6.1"
 retrofit = "2.9.0"
-preferenceKtx = "1.2.1"
-preference = "1.2.0"
 webkit = "1.13.0"
 
 [libraries]
@@ -24,9 +22,6 @@ artifactid = { module = "groupId:artifactId", version.ref = "artifactid" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
-androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preferenceKtx" }
-androidx-preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
-androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

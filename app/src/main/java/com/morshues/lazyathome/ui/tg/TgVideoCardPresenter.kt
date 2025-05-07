@@ -11,11 +11,13 @@ class TgVideoCardPresenter : BaseCardPresenter() {
             cardView.titleText = item.filename
             cardView.contentText = item.durationStr
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT)
-            Glide.with(viewHolder.view.context)
-                .load(item.thumbnail)
-                .centerCrop()
-                .error(getDefaultCardImage())
-                .into(cardView.mainImageView)
+            cardView.mainImageView?.let { view ->
+                Glide.with(viewHolder.view.context)
+                    .load(item.thumbnail)
+                    .centerCrop()
+                    .error(getDefaultCardImage())
+                    .into(view)
+            }
         }
     }
 }
