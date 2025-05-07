@@ -39,8 +39,9 @@ class RemoteControlHelper(
     private var currentMode = RemoteMode.DRAG_SCROLL
     private var currentZoom = 1.0f
 
-    init {
+    fun initScripts() {
         webView.evaluateJavascript("""
+            console.error("evaluate" + JSON.stringify(window.__invertSetup))
             if (typeof window.__invertSetup === 'undefined') {
                 window.__invertSetup = true;
                 window.__invertState = false;
@@ -51,7 +52,7 @@ class RemoteControlHelper(
                     window.__invertState = !window.__invertState;
                     if (window.__invertState) {
                         window.__invertStyle.innerHTML = `
-                            html {
+                            body {
                                 filter: invert(1) hue-rotate(180deg) !important;
                                 background: #000 !important;
                             }

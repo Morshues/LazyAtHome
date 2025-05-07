@@ -77,6 +77,7 @@ class LinkPageActivity : ComponentActivity() {
             """.trimIndent(), null)
 
             binding.webView.post {
+                remoteControlHelper.initScripts()
                 remoteControlHelper
                     .setDragCenter(binding.webView.width / 2f, binding.webView.height / 2f)
             }
