@@ -69,4 +69,16 @@
             app:seekBarIncrement="10" />
 
     </PreferenceCategory>
+
+    <Preference
+        android:layout="@layout/preference_divider"
+        android:selectable="false" />
+
+    <Preference
+        android:key="app_version"
+        android:title="@string/settings_pref_app_version"
+        android:summary=""
+        android:selectable="false"
+        android:enabled="false" />
+
 </PreferenceScreen>

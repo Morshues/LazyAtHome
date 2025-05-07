@@ -29,6 +29,7 @@
     <string name="settings_pref_time_bar_seek_title">TimeBar快轉時間 (秒)</string>
     <string name="settings_pref_button_seek_title">介面按鈕快轉時間 (秒)</string>
     <string name="settings_pref_link_page_scroll_speed">網頁捲動速度</string>
+    <string name="settings_pref_app_version">應用程式版本</string>
 
     <string name="settings_row_order_instructions">
         使用說明：\n

@@ -31,6 +31,7 @@
     <string name="settings_pref_time_bar_seek_title">TimeBar Seek Amount (s)</string>
     <string name="settings_pref_button_seek_title">Forward/Backward Button Seek Amount (s)</string>
     <string name="settings_pref_link_page_scroll_speed">Page Scroll Speed</string>
+    <string name="settings_pref_app_version">App Version</string>
 
     <string name="settings_row_order_instructions">
         Instructions:\n

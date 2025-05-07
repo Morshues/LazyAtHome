@@ -28,6 +28,15 @@ class SettingsFragment : LeanbackPreferenceFragmentCompat() {
             Preference.SummaryProvider<SeekBarPreference> { pref ->
                 "${(pref.value / 1000)} 秒"
             }
+
+        val versionPref = findPreference<Preference>("app_version")
+        val versionName = try {
+            val pInfo = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
+            pInfo.versionName
+        } catch (e: Exception) {
+            "Unknown"
+        }
+        versionPref?.summary = "v$versionName"
     }
 
     override fun onDisplayPreferenceDialog(preference: Preference) {
