@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.morshues.lazyathome.data.model.EditTgVideoRequestData
 import com.morshues.lazyathome.data.model.TgVideoItem
 import com.morshues.lazyathome.data.repository.TgVideoRepository
 import com.morshues.lazyathome.ui.common.IVideoListModel
@@ -20,11 +21,29 @@ class TgVideoViewModel(
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> get() = _errorMessage
 
-    fun loadData() {
+    fun loadData(nsfw: Boolean) {
         repository.fetchVideoList(
+            nsfw = nsfw,
             onSuccess = { data -> _dataList.postValue(data) },
             onError = { error -> _errorMessage.postValue(error) }
         )
+    }
+
+    fun toggleNSFW(item: TgVideoItem) {
+        viewModelScope.launch {
+            _errorMessage.value = ""
+            val payload = EditTgVideoRequestData(!item.nsfw)
+            val result = repository.editLinkPage(item.id, payload)
+            if (result != null) {
+                val currentList = _dataList.value.orEmpty()
+                val updatedList = currentList.map {
+                    if (it.id == item.id) result else it
+                }
+                _dataList.postValue(updatedList)
+            } else {
+                _errorMessage.postValue("Edit Failed")
+            }
+        }
     }
 
     fun deleteItem(item: TgVideoItem) {

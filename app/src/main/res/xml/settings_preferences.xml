@@ -13,6 +13,11 @@
             android:singleLine="true"
             android:selectAllOnFocus="true" />
 
+        <CheckBoxPreference
+            android:key="nsfw"
+            android:title="@string/settings_pref_nsfw"
+            android:defaultValue="true" />
+
         <Preference
             android:key="row_order_editor"
             android:title="@string/settings_pref_row_order_title"

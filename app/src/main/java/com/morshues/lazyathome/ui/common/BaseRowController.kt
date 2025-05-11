@@ -1,5 +1,6 @@
 package com.morshues.lazyathome.ui.common
 
+import android.view.Menu
 import android.view.View
 import android.widget.PopupMenu
 import androidx.leanback.widget.ListRow
@@ -31,10 +32,11 @@ abstract class BaseRowController(
         return presenter
     }
 
-    protected open fun showPopupMenu(item: Any, anchorView: View) {
+    protected fun showPopupMenu(item: Any, anchorView: View) {
         val popupMenu = PopupMenu(anchorView.context, anchorView)
         popupMenu.menu.apply {
             add(99, MENU_DELETE, 99, R.string.delete)
+            buildPopupMenu(this, item)
         }
 
         popupMenu.setOnMenuItemClickListener { menuItem ->
@@ -43,11 +45,13 @@ abstract class BaseRowController(
                     deleteItem(item)
                     true
                 }
-                else -> false
+                else -> onCustomMenuItemClick(menuItem.itemId, item)
             }
         }
         popupMenu.show()
     }
+    protected open fun buildPopupMenu(menu: Menu, item: Any) {}
+    protected open fun onCustomMenuItemClick(itemId: Int, item: Any): Boolean = false
 
     protected open fun deleteItem(item: Any) {}
 

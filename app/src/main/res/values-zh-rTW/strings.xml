@@ -3,6 +3,7 @@
     <!-- Common -->
     <string name="edit">編輯</string>
     <string name="delete">刪除</string>
+    <string name="toggle_nsfw">切換NSFW</string>
 
     <!-- Rows -->
     <string name="row_library">Library</string>
@@ -23,6 +24,7 @@
     <string name="settings_pref_category_player">播放器</string>
     <string name="settings_pref_category_link_page">網頁</string>
     <string name="settings_pref_server_path_title">伺服器路徑</string>
+    <string name="settings_pref_nsfw">NSFW</string>
     <string name="settings_pref_row_order_title">Row 排序</string>
     <string name="settings_pref_row_order_summary">調整顯示的順序</string>
     <string name="settings_pref_remote_seek_title">遙控器快轉時間 (秒)</string>

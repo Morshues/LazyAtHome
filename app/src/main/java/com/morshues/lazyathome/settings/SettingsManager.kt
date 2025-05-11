@@ -13,6 +13,11 @@ object SettingsManager {
             .getString("server_path", DEFAULT_SERVER_PATH) ?: DEFAULT_SERVER_PATH
     }
 
+    fun getNSFW(context: Context): Boolean {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+            .getBoolean("nsfw", true)
+    }
+
     fun getRowOrderWithEnabled(context: Context): MutableList<RowSetting> {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         val order = prefs.getString("row_order", "") ?: ""

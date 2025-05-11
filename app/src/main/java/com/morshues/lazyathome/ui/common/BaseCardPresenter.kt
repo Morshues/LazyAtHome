@@ -28,13 +28,12 @@ abstract class BaseCardPresenter : Presenter() {
 
         val cardView = object : ImageCardView(parent.context) {
             override fun setSelected(selected: Boolean) {
-                updateCardBackgroundColor(this, selected)
+                updateCardBackgroundColor(this, selected, tag)
                 super.setSelected(selected)
             }
         }.apply {
             isFocusable = true
             isFocusableInTouchMode = true
-            updateCardBackgroundColor(this, false)
         }
 
         return ViewHolder(cardView)
@@ -47,6 +46,7 @@ abstract class BaseCardPresenter : Presenter() {
 
         Log.d(TAG, "onBindViewHolder")
         val cardView = viewHolder.view as ImageCardView
+        cardView.tag = item
 
         cardView.setOnClickListener {
             onItemClick?.invoke(item)
@@ -63,6 +63,7 @@ abstract class BaseCardPresenter : Presenter() {
         }
 
         onBindCard(cardView, item, viewHolder)
+        updateCardBackgroundColor(cardView, false, item)
     }
 
     abstract fun onBindCard(cardView: ImageCardView, item: Any, viewHolder: ViewHolder)
@@ -77,10 +78,12 @@ abstract class BaseCardPresenter : Presenter() {
 
     protected fun getDefaultCardImage(): Drawable? = mDefaultCardImage
 
-    private fun updateCardBackgroundColor(view: ImageCardView, selected: Boolean) {
-        val color = if (selected) sSelectedBackgroundColor else sDefaultBackgroundColor
-        // Both background colors should be set because the view"s background is temporarily visible
-        // during animations.
+    protected open fun getBackgroundColor(item: Any?, selected: Boolean): Int {
+        return if (selected) sSelectedBackgroundColor else sDefaultBackgroundColor
+    }
+
+    private fun updateCardBackgroundColor(view: ImageCardView, selected: Boolean, item: Any?) {
+        val color = getBackgroundColor(item, selected)
         view.setBackgroundColor(color)
         view.setInfoAreaBackgroundColor(color)
     }

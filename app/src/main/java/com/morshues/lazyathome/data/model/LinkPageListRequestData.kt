@@ -1,5 +1,5 @@
 package com.morshues.lazyathome.data.model
 
-data class TgVideoListRequestData(
+data class LinkPageListRequestData(
     var nsfw: Boolean,
 )

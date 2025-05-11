@@ -8,6 +8,7 @@ data class TgVideoItem(
     val filename: String,
     val duration: Float,
     val imgBase64: String,
+    val nsfw: Boolean,
 ) {
     val url: String
         get() = RetrofitClient.baseUrl + "tg/video?id=" + id

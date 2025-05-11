@@ -3,8 +3,9 @@
     <string name="browse_title" translatable="false">LazyAtHome</string>
 
     <!-- Common -->
-    <string name="edit">編輯</string>
-    <string name="delete">刪除</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="toggle_nsfw">Toggle NSFW</string>
 
     <!-- Rows -->
     <string name="row_library">Library</string>
@@ -25,6 +26,7 @@
     <string name="settings_pref_category_player">Player</string>
     <string name="settings_pref_category_link_page">Page</string>
     <string name="settings_pref_server_path_title">Server Path</string>
+    <string name="settings_pref_nsfw">NSFW</string>
     <string name="settings_pref_row_order_title">Row Order/Enabled</string>
     <string name="settings_pref_row_order_summary">Adjust the Display Order/Enable</string>
     <string name="settings_pref_remote_seek_title">Remote Controller Seek Amount (s)</string>

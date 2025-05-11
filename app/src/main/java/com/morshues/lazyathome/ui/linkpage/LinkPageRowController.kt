@@ -1,12 +1,15 @@
 package com.morshues.lazyathome.ui.linkpage
 
+import android.view.Menu
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.leanback.widget.ArrayObjectAdapter
 import androidx.leanback.widget.HeaderItem
 import androidx.leanback.widget.ListRow
+import com.morshues.lazyathome.R
 import com.morshues.lazyathome.data.model.LinkPage
+import com.morshues.lazyathome.settings.SettingsManager
 import com.morshues.lazyathome.ui.common.BaseRowController
 
 class LinkPageRowController(
@@ -35,7 +38,7 @@ class LinkPageRowController(
     }
 
     override fun loadData() {
-        viewModel.loadData()
+        viewModel.loadData(SettingsManager.getNSFW(activity))
     }
 
     override fun onClick(item: Any) {
@@ -57,6 +60,21 @@ class LinkPageRowController(
         return null
     }
 
+    override fun buildPopupMenu(menu: Menu, item: Any) {
+        menu.add(1, MENU_NSFW, 1, R.string.toggle_nsfw)
+    }
+
+    override fun onCustomMenuItemClick(itemId: Int, item: Any): Boolean {
+        if (item !is LinkPage) return false
+        return when (itemId) {
+            MENU_NSFW -> {
+                viewModel.toggleNSFW(item)
+                true
+            }
+            else -> false
+        }
+    }
+
     override fun deleteItem(item: Any) {
         if (item is LinkPage) {
             viewModel.deleteItem(item)
@@ -65,5 +83,6 @@ class LinkPageRowController(
 
     companion object {
         const val ID = "link_page"
+        const val MENU_NSFW = 1
     }
 }
