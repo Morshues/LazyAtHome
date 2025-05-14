@@ -7,6 +7,7 @@
     <color name="default_background">#3d3d3d</color>
     <color name="selected_background_nsfw">#C2185B</color>
     <color name="default_background_nsfw">#880E4F</color>
+    <color name="video_player_time_progress">#cc666666</color>
 
     <color name="row_item_enabled_activated">#7ABEFF</color>
     <color name="row_item_enabled_default">#51AAFF</color>

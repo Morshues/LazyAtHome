@@ -6,6 +6,8 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.KeyEvent
 import android.view.WindowManager
 import android.widget.ImageButton
@@ -25,6 +27,7 @@ import com.morshues.lazyathome.databinding.ActivityVideoPlayerBinding
 import com.morshues.lazyathome.player.IPlayable
 import com.morshues.lazyathome.player.VideoPlayerLauncherHolder
 import com.morshues.lazyathome.settings.SettingsManager
+import com.morshues.lazyathome.util.formatDurationMSPair
 import kotlinx.coroutines.launch
 
 class VideoPlayerActivity : ComponentActivity() {
@@ -37,7 +40,22 @@ class VideoPlayerActivity : ComponentActivity() {
     private lateinit var prevButton: ImageButton
     private lateinit var nextButton: ImageButton
 
+    private val controlPanelTimeout = 1_000L
     private var remoteSeekMs = 5_000L
+
+    private val hideTimeProgressHandler = Handler(Looper.getMainLooper())
+    private val hideTimeProgressRunnable = Runnable {
+        binding.timeProgress.isVisible = false
+    }
+
+    private fun resetTimeProgressTimeout() {
+        player?.let { p ->
+            binding.timeProgress.text = formatDurationMSPair(p.currentPosition, p.duration)
+            binding.timeProgress.isVisible = true
+            hideTimeProgressHandler.removeCallbacks(hideTimeProgressRunnable)
+            hideTimeProgressHandler.postDelayed(hideTimeProgressRunnable, controlPanelTimeout)
+        }
+    }
 
     private val onBackPressedCallback = object : OnBackPressedCallback(true) {
         @UnstableApi
@@ -148,9 +166,11 @@ class VideoPlayerActivity : ComponentActivity() {
                         if (event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
                             val newPosition = (position - remoteSeekMs).coerceAtLeast(0)
                             p.seekTo(newPosition)
+                            resetTimeProgressTimeout()
                         } else if (event.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
                             val newPosition = (position + remoteSeekMs).coerceAtMost(duration)
                             p.seekTo(newPosition)
+                            resetTimeProgressTimeout()
                         }
                     }
                     return true
