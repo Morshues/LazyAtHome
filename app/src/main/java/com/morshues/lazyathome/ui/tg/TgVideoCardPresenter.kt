@@ -22,7 +22,7 @@ class TgVideoCardPresenter : BaseCardPresenter() {
     override fun onBindCard(cardView: ImageCardView, item: Any, viewHolder: ViewHolder) {
         if (item is TgVideoItem) {
             cardView.titleText = item.filename
-            cardView.contentText = item.durationStr
+            cardView.contentText = "${item.createdAt.substring(0, 10)} (${item.durationStr})"
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT)
             cardView.mainImageView?.let { view ->
                 Glide.with(viewHolder.view.context)
