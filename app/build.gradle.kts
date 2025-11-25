@@ -1,8 +1,11 @@
 import com.android.build.api.dsl.Packaging
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    // Kotlin serialization plugin for type safe routes and navigation arguments
+    kotlin("plugin.serialization") version "2.2.20"
 }
 
 android {
@@ -13,8 +16,8 @@ android {
         applicationId = "com.morshues.lazyathome"
         minSdk = 24
         targetSdk = 36
-        versionCode = 26
-        versionName = "0.5.10"
+        versionCode = 27
+        versionName = "0.6.0"
 
         buildConfigField("String", "BASE_URL", "\"http://192.168.1.126:3000/\"")
     }
@@ -34,11 +37,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
+        }
     }
 }
 
@@ -52,5 +57,5 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
-
+    implementation(libs.kotlinx.serialization.json)
 }

@@ -43,4 +43,18 @@
         - BACK Button: Save Settings
     </string>
 
+    <!-- Login -->
+    <string name="settings_pref_login_title">Login</string>
+    <string name="settings_pref_login_summary_logged_out">Not logged in</string>
+    <string name="settings_pref_login_summary_logged_in">Logged in as %s</string>
+    <string name="settings_pref_logout_title">Logout</string>
+    <string name="login_dialog_title">Login</string>
+    <string name="login_email_hint">Email</string>
+    <string name="login_password_hint">Password</string>
+    <string name="login_button_text">Login</string>
+    <string name="login_success">Login successful</string>
+    <string name="login_error_empty">Email and password cannot be empty</string>
+    <string name="login_error_failed">Login failed: %s</string>
+    <string name="logout_success">Logged out successfully</string>
+
 </resources>

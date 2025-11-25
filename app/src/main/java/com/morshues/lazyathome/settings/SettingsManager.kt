@@ -72,4 +72,48 @@ object SettingsManager {
             .getInt("link_page_scroll_speed", 100).toFloat()
     }
 
+    fun getAccessToken(context: Context): String? {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+            .getString("access_token", null)
+    }
+
+    fun getRefreshToken(context: Context): String? {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+            .getString("refresh_token", null)
+    }
+
+    fun getUserEmail(context: Context): String? {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+            .getString("user_email", null)
+    }
+
+    fun getUserName(context: Context): String? {
+        return PreferenceManager.getDefaultSharedPreferences(context)
+            .getString("user_name", null)
+    }
+
+    fun saveAuthData(context: Context, accessToken: String, refreshToken: String, email: String, name: String) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+            .edit()
+            .putString("access_token", accessToken)
+            .putString("refresh_token", refreshToken)
+            .putString("user_email", email)
+            .putString("user_name", name)
+            .apply()
+    }
+
+    fun clearAuthData(context: Context) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+            .edit()
+            .remove("access_token")
+            .remove("refresh_token")
+            .remove("user_email")
+            .remove("user_name")
+            .apply()
+    }
+
+    fun isLoggedIn(context: Context): Boolean {
+        return getAccessToken(context) != null
+    }
+
 }

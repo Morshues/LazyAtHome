@@ -13,6 +13,11 @@
             android:singleLine="true"
             android:selectAllOnFocus="true" />
 
+        <Preference
+            android:key="login_logout"
+            android:title="@string/settings_pref_login_title"
+            android:summary="@string/settings_pref_login_summary_logged_out" />
+
         <CheckBoxPreference
             android:key="nsfw"
             android:title="@string/settings_pref_nsfw"

@@ -29,6 +29,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.morshues.lazyathome.data.network.AuthRetrofitClient
 import com.morshues.lazyathome.data.network.RetrofitClient
 import com.morshues.lazyathome.settings.SettingsManager
 import com.morshues.lazyathome.ui.bangga.BanggaRowController
@@ -228,6 +229,7 @@ class MainFragment : BrowseSupportFragment() {
 
     private val settingsLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
+            AuthRetrofitClient.reset()
             RetrofitClient.reset()
             resetViewModels()
             initRows()
