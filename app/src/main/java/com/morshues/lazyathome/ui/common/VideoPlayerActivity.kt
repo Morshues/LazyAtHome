@@ -20,10 +20,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerControlView
 import com.morshues.lazyathome.databinding.ActivityVideoPlayerBinding
+import com.morshues.lazyathome.di.AppModule
 import com.morshues.lazyathome.player.IPlayable
 import com.morshues.lazyathome.player.VideoPlayerLauncherHolder
 import com.morshues.lazyathome.settings.SettingsManager
@@ -125,9 +128,13 @@ class VideoPlayerActivity : ComponentActivity() {
             playVideo(currentIndex-1)
         }
 
+        val dataSourceFactory = OkHttpDataSource.Factory(AppModule.videoStreamingOkHttpClient)
+        val mediaSourceFactory = DefaultMediaSourceFactory(this)
+            .setDataSourceFactory(dataSourceFactory)
         player = ExoPlayer.Builder(this)
             .setSeekBackIncrementMs(seekButtonsMs)
             .setSeekForwardIncrementMs(seekButtonsMs)
+            .setMediaSourceFactory(mediaSourceFactory)
             .build().apply {
                 addListener(playerListener)
             }

@@ -2,7 +2,6 @@ package com.morshues.lazyathome.ui.settings
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.provider.Settings
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -16,14 +15,15 @@ import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.SeekBarPreference
 import com.morshues.lazyathome.R
-import com.morshues.lazyathome.data.network.AuthRetrofitClient
 import com.morshues.lazyathome.data.repository.AuthRepository
 import com.morshues.lazyathome.settings.SettingsManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class SettingsFragment : LeanbackPreferenceFragmentCompat() {
+class SettingsFragment(
+    val authRepository: AuthRepository
+) : LeanbackPreferenceFragmentCompat() {
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings_preferences, rootKey)
@@ -135,9 +135,7 @@ class SettingsFragment : LeanbackPreferenceFragmentCompat() {
         loginButton.isEnabled = false
         cancelButton.isEnabled = false
 
-        val authApi = AuthRetrofitClient.getService(requireContext())
-        val authRepository = AuthRepository(authApi)
-        val deviceId = Settings.Secure.getString(requireContext().contentResolver, Settings.Secure.ANDROID_ID)
+        val deviceId = SettingsManager.getOrCreateDeviceId(requireContext())
 
         lifecycleScope.launch {
             try {

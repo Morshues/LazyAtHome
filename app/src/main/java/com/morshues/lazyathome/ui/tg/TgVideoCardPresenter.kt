@@ -4,12 +4,16 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.leanback.widget.ImageCardView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import com.morshues.lazyathome.R
 import com.morshues.lazyathome.data.model.TgVideoItem
 import com.morshues.lazyathome.ui.common.BaseCardPresenter
 import kotlin.properties.Delegates
 
-class TgVideoCardPresenter : BaseCardPresenter() {
+class TgVideoCardPresenter(
+    private val accessToken: String,
+) : BaseCardPresenter() {
     private var sNSFWDefaultBackgroundColor: Int by Delegates.notNull()
     private var sNSFWSelectedBackgroundColor: Int by Delegates.notNull()
 
@@ -24,9 +28,16 @@ class TgVideoCardPresenter : BaseCardPresenter() {
             cardView.titleText = item.filename
             cardView.contentText = "${item.createdAt.substring(0, 10)} (${item.durationStr})"
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT)
+
+            val glideUrl = GlideUrl(
+                item.thumbnail,
+                LazyHeaders.Builder()
+                    .addHeader("Authorization", "Bearer $accessToken")
+                    .build()
+            )
             cardView.mainImageView?.let { view ->
                 Glide.with(viewHolder.view.context)
-                    .load(item.thumbnail)
+                    .load(glideUrl)
                     .centerCrop()
                     .error(getDefaultCardImage())
                     .into(view)

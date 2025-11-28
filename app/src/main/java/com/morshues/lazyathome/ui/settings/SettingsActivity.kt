@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.fragment.app.FragmentActivity
 import com.morshues.lazyathome.R
+import com.morshues.lazyathome.di.AppModule
 
 class SettingsActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -12,7 +13,9 @@ class SettingsActivity : FragmentActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.settings_container, SettingsFragment())
+                .replace(R.id.settings_container, SettingsFragment(
+                    AppModule.authRepository
+                ))
                 .commitNow()
         }
 

@@ -12,10 +12,10 @@ data class TgVideoItem(
     val createdAt: String,
 ) {
     val url: String
-        get() = RetrofitClient.baseUrl + "tg/video?id=" + id
+        get() = RetrofitClient.baseUrl + "tg/video_api?id=" + id
 
     val thumbnail: String
-        get() = RetrofitClient.baseUrl + "tg/video_thumbs?id=" + id
+        get() = RetrofitClient.baseUrl + "tg/video_thumbs_api?id=" + id
 
     val durationStr: String
         get() = formatDuration(duration)

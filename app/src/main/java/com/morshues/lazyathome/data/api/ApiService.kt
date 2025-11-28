@@ -15,16 +15,16 @@ import retrofit2.Response
 import retrofit2.http.Path
 
 interface ApiService {
-    @POST("tg/list")
+    @POST("tg/list_api")
     fun fetchTgVideoList(@Body requestBody: TgVideoListRequestData): Call<List<TgVideoItem>>
 
-    @POST("tg/{id}/edit")
+    @POST("tg/{id}/edit_api")
     suspend fun editTgVideoItem(
         @Path("id") id: String,
         @Body requestBody: EditTgVideoRequestData,
     ): Response<TgVideoItem>
 
-    @POST("tg/{id}/delete")
+    @POST("tg/{id}/delete_api")
     suspend fun deleteTgItem(@Path("id") id: String)
 
     @GET("library/list")

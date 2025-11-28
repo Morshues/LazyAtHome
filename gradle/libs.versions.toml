@@ -3,12 +3,14 @@ agp = "8.13.1"
 fragmentKtx = "1.8.9"
 kotlin = "2.2.21"
 coreKtx = "1.17.0"
+jwtdecode = "2.0.2"
 leanback = "1.2.0"
 glide = "5.0.5"
 kotlinxSerializationJson = "1.9.0"
 leanbackPreference = "1.2.0"
 media3Exoplayer = "1.8.0"
 retrofit = "3.0.0"
+media3DatasourceOkhttp = "1.8.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -21,6 +23,8 @@ converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+jwtdecode = { module = "com.auth0.android:jwtdecode", version.ref = "jwtdecode" }
+androidx-media3-datasource-okhttp = { group = "androidx.media3", name = "media3-datasource-okhttp", version.ref = "media3DatasourceOkhttp" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
