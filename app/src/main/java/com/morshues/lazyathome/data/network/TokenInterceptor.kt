@@ -1,6 +1,7 @@
 package com.morshues.lazyathome.data.network
 
 import android.content.Context
+import android.util.Log
 import com.morshues.lazyathome.data.repository.AuthRepository
 import com.morshues.lazyathome.settings.SettingsManager
 import com.morshues.lazyathome.util.JwtUtils
@@ -62,16 +63,20 @@ class TokenInterceptor(
                             ?: throw IllegalStateException("No refresh token available")
                         val deviceId = SettingsManager.getOrCreateDeviceId(context)
 
-                        val newTokens = authRepository.refresh(refreshToken, deviceId)
-                        val newExpiresAt = JwtUtils.getExpirationTime(newTokens.accessToken)
-                        SettingsManager.saveTokens(
-                            context,
-                            newTokens.accessToken,
-                            newTokens.refreshToken,
-                            newExpiresAt,
-                        )
+                        try {
+                            val newTokens = authRepository.refresh(refreshToken, deviceId)
+                            val newExpiresAt = JwtUtils.getExpirationTime(newTokens.accessToken)
+                            SettingsManager.saveTokens(
+                                context,
+                                newTokens.accessToken,
+                                newTokens.refreshToken,
+                                newExpiresAt,
+                            )
 
-                        return newTokens.accessToken
+                            return newTokens.accessToken
+                        } catch (e: Exception) {
+                            Log.i(TAG, "Refresh token failed: ${e.message}")
+                        }
                     }
 
                     return latestToken ?: throw IllegalStateException("No access token available")
@@ -83,6 +88,8 @@ class TokenInterceptor(
     }
 
     companion object {
+        private const val TAG = "TokenInterceptor"
+
         private const val REFRESH_THRESHOLD = 2 * 60 * 1000
     }
 }
