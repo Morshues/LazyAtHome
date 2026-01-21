@@ -5,32 +5,26 @@ import androidx.preference.PreferenceManager
 import com.morshues.lazyathome.BuildConfig
 import com.morshues.lazyathome.ui.settings.RowOrderFragment.Companion.DEFAULT_ROW_OPTIONS
 import androidx.core.content.edit
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object SettingsManager {
-    private const val DEFAULT_SERVER_PATH = BuildConfig.BASE_URL
+@Singleton
+class SettingsManager @Inject constructor(
+    @param:ApplicationContext private val context: Context,
+) {
+    private val prefs by lazy { PreferenceManager.getDefaultSharedPreferences(context) }
 
-    private const val KEY_ACCESS_TOKEN = "access_token"
-    private const val KEY_REFRESH_TOKEN = "refresh_token"
-    private const val KEY_TOKEN_EXPIRES_AT = "token_expires_at"
-    private const val KEY_DEVICE_ID = "device_id"
-    private const val KEY_CACHED_EMAIL = "cached_email"
-    private const val KEY_CACHED_USER_NAME = "user_name"
-
-    fun getServerPath(context: Context): String {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-            .getString("server_path", DEFAULT_SERVER_PATH) ?: DEFAULT_SERVER_PATH
+    fun getServerPath(): String {
+        return prefs.getString("server_path", DEFAULT_SERVER_PATH) ?: DEFAULT_SERVER_PATH
     }
 
-    fun getNSFW(context: Context): Boolean {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-            .getBoolean("nsfw", true)
+    fun getNSFW(): Boolean {
+        return prefs.getBoolean("nsfw", true)
     }
 
-    fun getRowOrderWithEnabled(context: Context): MutableList<RowSetting> {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+    fun getRowOrderWithEnabled(): MutableList<RowSetting> {
         val order = prefs.getString("row_order", "") ?: ""
         val enabledSet = prefs.getStringSet("enabled_rows", emptySet()) ?: emptySet()
 
@@ -55,107 +49,102 @@ object SettingsManager {
         return result
     }
 
-    fun saveRowOrderAndEnabled(context: Context, rows: List<RowSetting>) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        prefs.edit()
-            .putString("row_order", rows.joinToString(",") { it.id })
-            .putStringSet("enabled_rows", rows.filter { it.enabled }.map { it.id }.toSet())
-            .apply()
+    fun saveRowOrderAndEnabled(rows: List<RowSetting>) {
+        prefs.edit {
+            putString("row_order", rows.joinToString(",") { it.id })
+                .putStringSet("enabled_rows", rows.filter { it.enabled }.map { it.id }.toSet())
+        }
     }
 
-    fun getRemoteSeekStepMs(context: Context): Long {
-        return 1_000L * PreferenceManager.getDefaultSharedPreferences(context)
-            .getInt("remote_seek_step_ms", 5)
+    fun getRemoteSeekStepMs(): Long {
+        return 1_000L * prefs.getInt("remote_seek_step_ms", 5)
     }
 
-    fun getTimeBarSeekStepMs(context: Context): Long {
-        return 1_000L * PreferenceManager.getDefaultSharedPreferences(context)
-            .getInt("time_bar_seek_step_ms", 30)
+    fun getTimeBarSeekStepMs(): Long {
+        return 1_000L * prefs.getInt("time_bar_seek_step_ms", 30)
     }
 
-    fun getButtonSeekStepMs(context: Context): Long {
-        return 1_000L * PreferenceManager.getDefaultSharedPreferences(context)
-            .getInt("button_seek_step_ms", 120)
+    fun getButtonSeekStepMs(): Long {
+        return 1_000L * prefs.getInt("button_seek_step_ms", 120)
     }
 
-    fun getPageScrollSpeed(context: Context): Float {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-            .getInt("link_page_scroll_speed", 100).toFloat()
+    fun getPageScrollSpeed(): Float {
+        return prefs.getInt("link_page_scroll_speed", 100).toFloat()
     }
 
-    fun getOrCreateDeviceId(context: Context): String {
-        val existingId = PreferenceManager.getDefaultSharedPreferences(context)
-            .getString(KEY_DEVICE_ID, null)
+    fun getOrCreateDeviceId(): String {
+        val existingId = prefs.getString(KEY_DEVICE_ID, null)
         return if (existingId != null) {
             existingId
         } else {
             val newId = UUID.randomUUID().toString()
-            PreferenceManager.getDefaultSharedPreferences(context)
-                .edit {
-                    putString(KEY_DEVICE_ID, newId)
-                }
+            prefs.edit {
+                putString(KEY_DEVICE_ID, newId)
+            }
             newId
         }
     }
 
-    fun getAccessToken(context: Context): String? {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-            .getString(KEY_ACCESS_TOKEN, null)
+    fun getAccessToken(): String? {
+        return prefs.getString(KEY_ACCESS_TOKEN, null)
     }
 
-    fun getRefreshToken(context: Context): String? {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-            .getString(KEY_REFRESH_TOKEN, null)
+    fun getRefreshToken(): String? {
+        return prefs.getString(KEY_REFRESH_TOKEN, null)
     }
 
-    fun getTokenExpiresAt(context: Context): Long? {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-            .getLong(KEY_TOKEN_EXPIRES_AT, 0)
+    fun getTokenExpiresAt(): Long? {
+        return prefs.getLong(KEY_TOKEN_EXPIRES_AT, 0)
     }
 
-    fun getUserEmail(context: Context): String? {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-            .getString(KEY_CACHED_EMAIL, null)
+    fun getUserEmail(): String? {
+        return prefs.getString(KEY_CACHED_EMAIL, null)
     }
 
-    fun getUserName(context: Context): String? {
-        return PreferenceManager.getDefaultSharedPreferences(context)
-            .getString(KEY_CACHED_USER_NAME, null)
+    fun getUserName(): String? {
+        return prefs.getString(KEY_CACHED_USER_NAME, null)
     }
 
-    fun saveAuthData(context: Context, accessToken: String, refreshToken: String, email: String, name: String) {
-        PreferenceManager.getDefaultSharedPreferences(context)
-            .edit {
-                putString(KEY_ACCESS_TOKEN, accessToken)
-                putString(KEY_REFRESH_TOKEN, refreshToken)
-                putString(KEY_CACHED_EMAIL, email)
-                putString(KEY_CACHED_USER_NAME, name)
+    fun saveAuthData(accessToken: String, refreshToken: String, email: String, name: String) {
+        prefs.edit {
+            putString(KEY_ACCESS_TOKEN, accessToken)
+            putString(KEY_REFRESH_TOKEN, refreshToken)
+            putString(KEY_CACHED_EMAIL, email)
+            putString(KEY_CACHED_USER_NAME, name)
+        }
+    }
+
+    fun saveTokens(access: String, refresh: String, expiresAt: Long? = null) {
+        prefs.edit {
+            putString(KEY_ACCESS_TOKEN, access)
+            putString(KEY_REFRESH_TOKEN, refresh)
+            if (expiresAt != null) {
+                putLong(KEY_TOKEN_EXPIRES_AT, expiresAt)
             }
+        }
     }
 
-    suspend fun saveTokens(context: Context, access: String, refresh: String, expiresAt: Long? = null) {
-        PreferenceManager.getDefaultSharedPreferences(context)
-            .edit {
-                putString(KEY_ACCESS_TOKEN, access)
-                putString(KEY_REFRESH_TOKEN, refresh)
-                if (expiresAt != null) {
-                    putLong(KEY_TOKEN_EXPIRES_AT, expiresAt)
-                }
-            }
+    fun clearAuthData() {
+        prefs.edit {
+            remove(KEY_ACCESS_TOKEN)
+            remove(KEY_REFRESH_TOKEN)
+            remove(KEY_CACHED_EMAIL)
+            remove(KEY_CACHED_USER_NAME)
+        }
     }
 
-    fun clearAuthData(context: Context) {
-        PreferenceManager.getDefaultSharedPreferences(context)
-            .edit {
-                remove(KEY_ACCESS_TOKEN)
-                remove(KEY_REFRESH_TOKEN)
-                remove(KEY_CACHED_EMAIL)
-                remove(KEY_CACHED_USER_NAME)
-            }
+    fun isLoggedIn(): Boolean {
+        return getAccessToken() != null
     }
 
-    fun isLoggedIn(context: Context): Boolean {
-        return getAccessToken(context) != null
-    }
+    companion object {
+        private const val DEFAULT_SERVER_PATH = BuildConfig.BASE_URL
 
+        private const val KEY_ACCESS_TOKEN = "access_token"
+        private const val KEY_REFRESH_TOKEN = "refresh_token"
+        private const val KEY_TOKEN_EXPIRES_AT = "token_expires_at"
+        private const val KEY_DEVICE_ID = "device_id"
+        private const val KEY_CACHED_EMAIL = "cached_email"
+        private const val KEY_CACHED_USER_NAME = "user_name"
+    }
 }

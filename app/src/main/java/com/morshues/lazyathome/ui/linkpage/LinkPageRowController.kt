@@ -16,6 +16,7 @@ class LinkPageRowController(
     title: String,
     private val activity: FragmentActivity,
     private val viewModel: LinkPageViewModel,
+    private val settingsManager: SettingsManager,
 ) : BaseRowController() {
     private val cardPresenter = bindClick(LinkPageCardPresenter())
     private val rowAdapter = ArrayObjectAdapter(cardPresenter)
@@ -38,7 +39,7 @@ class LinkPageRowController(
     }
 
     override fun loadData() {
-        viewModel.loadData(SettingsManager.getNSFW(activity))
+        viewModel.loadData(settingsManager.getNSFW())
     }
 
     override fun onClick(item: Any) {

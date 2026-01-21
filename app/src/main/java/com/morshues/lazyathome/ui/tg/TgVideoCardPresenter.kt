@@ -26,7 +26,7 @@ class TgVideoCardPresenter(
     override fun onBindCard(cardView: ImageCardView, item: Any, viewHolder: ViewHolder) {
         if (item is TgVideoItem) {
             cardView.titleText = item.filename
-            cardView.contentText = "${item.createdAt.substring(0, 10)} (${item.durationStr})"
+            cardView.contentText = "${item.createdAt.take(10)} (${item.durationStr})"
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT)
 
             val glideUrl = GlideUrl(

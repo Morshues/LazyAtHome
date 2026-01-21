@@ -22,6 +22,7 @@ class RemoteControlHelper(
     private val dragAnchor: View,
     private val controlPanel: View,
     private val controlModeText: TextView,
+    settingsManager: SettingsManager,
 ) {
     private val contextRef = WeakReference(context)
 
@@ -33,7 +34,7 @@ class RemoteControlHelper(
         controlPanel.isVisible = false
     }
 
-    private var dragScrollSpeed = SettingsManager.getPageScrollSpeed(context)
+    private var dragScrollSpeed = settingsManager.getPageScrollSpeed()
     private var dragCenterX = 0f
     private var dragCenterY = 0f
     private var currentMode = RemoteMode.DRAG_SCROLL

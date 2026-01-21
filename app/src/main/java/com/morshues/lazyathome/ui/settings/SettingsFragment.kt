@@ -17,13 +17,20 @@ import androidx.preference.SeekBarPreference
 import com.morshues.lazyathome.R
 import com.morshues.lazyathome.data.repository.AuthRepository
 import com.morshues.lazyathome.settings.SettingsManager
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class SettingsFragment(
-    val authRepository: AuthRepository
-) : LeanbackPreferenceFragmentCompat() {
+@AndroidEntryPoint
+class SettingsFragment : LeanbackPreferenceFragmentCompat() {
+
+    @Inject
+    lateinit var authRepository: AuthRepository
+
+    @Inject
+    lateinit var settingsManager: SettingsManager
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings_preferences, rootKey)
@@ -33,7 +40,7 @@ class SettingsFragment(
 
         // Login/Logout preference
         findPreference<Preference>("login_logout")?.setOnPreferenceClickListener {
-            if (SettingsManager.isLoggedIn(requireContext())) {
+            if (settingsManager.isLoggedIn()) {
                 handleLogout()
             } else {
                 showLoginDialog()
@@ -75,9 +82,8 @@ class SettingsFragment(
     private fun updateLoginStatus() {
         val loginLogoutPref = findPreference<Preference>("login_logout")
 
-        if (SettingsManager.isLoggedIn(requireContext())) {
-            val userName = SettingsManager.getUserName(requireContext()) ?:
-                          SettingsManager.getUserEmail(requireContext()) ?: "User"
+        if (settingsManager.isLoggedIn()) {
+            val userName = settingsManager.getUserName() ?: settingsManager.getUserEmail() ?: "User"
             loginLogoutPref?.title = getString(R.string.settings_pref_logout_title)
             loginLogoutPref?.summary = getString(R.string.settings_pref_login_summary_logged_in, userName)
         } else {
@@ -135,7 +141,7 @@ class SettingsFragment(
         loginButton.isEnabled = false
         cancelButton.isEnabled = false
 
-        val deviceId = SettingsManager.getOrCreateDeviceId(requireContext())
+        val deviceId = settingsManager.getOrCreateDeviceId()
 
         lifecycleScope.launch {
             try {
@@ -145,8 +151,7 @@ class SettingsFragment(
 
                 if (response.ok) {
                     // Save auth data
-                    SettingsManager.saveAuthData(
-                        requireContext(),
+                    settingsManager.saveAuthData(
                         response.accessToken,
                         response.refreshToken,
                         response.user.email,
@@ -173,7 +178,7 @@ class SettingsFragment(
     }
 
     private fun handleLogout() {
-        SettingsManager.clearAuthData(requireContext())
+        settingsManager.clearAuthData()
         updateLoginStatus()
         Toast.makeText(requireContext(), R.string.logout_success, Toast.LENGTH_SHORT).show()
     }

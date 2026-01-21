@@ -1,6 +1,5 @@
 package com.morshues.lazyathome.data.network
 
-import android.content.Context
 import com.morshues.lazyathome.data.repository.AuthRepository
 import com.morshues.lazyathome.settings.SettingsManager
 import com.morshues.lazyathome.util.JwtUtils
@@ -11,7 +10,7 @@ import okhttp3.Response
 import okhttp3.Route
 
 class TokenAuthenticator(
-    private val context: Context,
+    private val settingsManager: SettingsManager,
     private val authRepository: AuthRepository
 ) : Authenticator {
 
@@ -28,7 +27,7 @@ class TokenAuthenticator(
         synchronized(this) {
             return runBlocking {
                 try {
-                    val currentToken = SettingsManager.getAccessToken(context)
+                    val currentToken = settingsManager.getAccessToken()
                     val requestToken = originalAuthHeader.removePrefix("Bearer ")
 
                     // Check if token was already refreshed by another concurrent request
@@ -38,13 +37,13 @@ class TokenAuthenticator(
                             .build()
                     }
 
-                    val refreshToken = SettingsManager.getRefreshToken(context)
+                    val refreshToken = settingsManager.getRefreshToken()
                         ?: return@runBlocking null
-                    val deviceId = SettingsManager.getOrCreateDeviceId(context)
+                    val deviceId = settingsManager.getOrCreateDeviceId()
 
                     val newTokens = authRepository.refresh(refreshToken, deviceId)
                     val expiresAt = JwtUtils.getExpirationTime(newTokens.accessToken)
-                    SettingsManager.saveTokens(context, newTokens.accessToken, newTokens.refreshToken, expiresAt)
+                    settingsManager.saveTokens(newTokens.accessToken, newTokens.refreshToken, expiresAt)
 
                     response.request.newBuilder()
                         .header("Authorization", "Bearer ${newTokens.accessToken}")
@@ -52,7 +51,7 @@ class TokenAuthenticator(
 
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    SettingsManager.clearAuthData(context)
+                    settingsManager.clearAuthData()
                     null
                 }
             }

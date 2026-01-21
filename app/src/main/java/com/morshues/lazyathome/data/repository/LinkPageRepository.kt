@@ -7,8 +7,9 @@ import com.morshues.lazyathome.data.model.LinkPageListRequestData
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.inject.Inject
 
-class LinkPageRepository(
+class LinkPageRepository @Inject constructor(
     private val api: ApiService
 ) {
     fun fetchLinkPageList(nsfw: Boolean, onSuccess: (List<LinkPage>) -> Unit, onError: (String) -> Unit) {

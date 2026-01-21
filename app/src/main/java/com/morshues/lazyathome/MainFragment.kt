@@ -24,35 +24,35 @@ import androidx.leanback.widget.RowPresenter
 import androidx.core.content.ContextCompat
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.morshues.lazyathome.data.network.AuthRetrofitClient
-import com.morshues.lazyathome.data.network.RetrofitClient
 import com.morshues.lazyathome.settings.SettingsManager
 import com.morshues.lazyathome.ui.bangga.BanggaRowController
 import com.morshues.lazyathome.ui.bangga.BanggaViewModel
-import com.morshues.lazyathome.ui.bangga.BanggaViewModelFactory
 import com.morshues.lazyathome.ui.common.BaseRowController
 import com.morshues.lazyathome.ui.common.RowInfo
 import com.morshues.lazyathome.ui.library.LibraryRowController
 import com.morshues.lazyathome.ui.library.LibraryViewModel
-import com.morshues.lazyathome.ui.library.LibraryViewModelFactory
 import com.morshues.lazyathome.ui.settings.SettingsActivity
 import com.morshues.lazyathome.ui.settings.SettingsRowController
 import com.morshues.lazyathome.ui.tg.TgVideoRowController
 import com.morshues.lazyathome.ui.tg.TgVideoViewModel
-import com.morshues.lazyathome.ui.tg.TgVideoViewModelFactory
 import com.morshues.lazyathome.ui.linkpage.LinkPageRowController
 import com.morshues.lazyathome.ui.linkpage.LinkPageViewModel
-import com.morshues.lazyathome.ui.linkpage.LinkPageViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 /**
  * Loads a grid of cards with movies to browse.
  */
+@AndroidEntryPoint
 class MainFragment : BrowseSupportFragment() {
+
+    @Inject
+    lateinit var settingsManager: SettingsManager
 
     private val mHandler = Handler(Looper.myLooper()!!)
     private lateinit var mBackgroundManager: BackgroundManager
@@ -61,10 +61,10 @@ class MainFragment : BrowseSupportFragment() {
     private var mBackgroundTimer: Timer? = null
     private var mBackgroundUri: String? = null
 
-    private lateinit var libraryViewModel: LibraryViewModel
-    private lateinit var tgVideosViewModel: TgVideoViewModel
-    private lateinit var banggaViewModel: BanggaViewModel
-    private lateinit var linkPageViewModel: LinkPageViewModel
+    private val libraryViewModel: LibraryViewModel by viewModels()
+    private val tgVideosViewModel: TgVideoViewModel by viewModels()
+    private val banggaViewModel: BanggaViewModel by viewModels()
+    private val linkPageViewModel: LinkPageViewModel by viewModels()
     private lateinit var allRowInfos: List<RowInfo>
 
     private val rowToControllerMap = mutableMapOf<Row, BaseRowController>()
@@ -95,7 +95,6 @@ class MainFragment : BrowseSupportFragment() {
 
         prepareBackgroundManager()
         setupUIElements()
-        resetViewModels()
         initRows()
         loadRows()
         setupEventListeners()
@@ -128,22 +127,6 @@ class MainFragment : BrowseSupportFragment() {
         searchAffordanceColor = ContextCompat.getColor(requireActivity(), R.color.search_opaque)
     }
 
-    private fun resetViewModels() {
-        viewModelStore.clear()
-        val service = RetrofitClient.getService(requireContext())
-        tgVideosViewModel = ViewModelProvider(this, TgVideoViewModelFactory(
-            service
-        ))[TgVideoViewModel::class.java]
-        libraryViewModel = ViewModelProvider(this, LibraryViewModelFactory(
-            service
-        ))[LibraryViewModel::class.java]
-        banggaViewModel = ViewModelProvider(this, BanggaViewModelFactory(
-        ))[BanggaViewModel::class.java]
-        linkPageViewModel = ViewModelProvider(this, LinkPageViewModelFactory(
-            service
-        ))[LinkPageViewModel::class.java]
-    }
-
     private fun initRows() {
         allRowInfos = listOf(
             RowInfo(LibraryRowController.ID) {
@@ -157,7 +140,8 @@ class MainFragment : BrowseSupportFragment() {
                 TgVideoRowController(
                     getString(R.string.row_tg_video),
                     requireActivity(),
-                    tgVideosViewModel
+                    tgVideosViewModel,
+                    settingsManager,
                 )
             },
             RowInfo(BanggaRowController.ID) {
@@ -172,13 +156,14 @@ class MainFragment : BrowseSupportFragment() {
                     getString(R.string.row_link_page),
                     requireActivity(),
                     linkPageViewModel,
+                    settingsManager,
                 )
             },
         )
     }
 
     private fun loadRows() {
-        val settings = SettingsManager.getRowOrderWithEnabled(requireContext())
+        val settings = settingsManager.getRowOrderWithEnabled()
         val enabledRowIds = settings.filter { it.enabled }.map { it.id }
 
         val rowsAdapter = ArrayObjectAdapter(ListRowPresenter())
@@ -229,9 +214,8 @@ class MainFragment : BrowseSupportFragment() {
 
     private val settingsLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
-            AuthRetrofitClient.reset()
-            RetrofitClient.reset()
-            resetViewModels()
+            // Reload rows after settings change (e.g., row order changed)
+            // Note: Server URL changes require app restart to take effect
             initRows()
             loadRows()
         }

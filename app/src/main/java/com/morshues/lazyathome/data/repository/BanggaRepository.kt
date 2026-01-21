@@ -4,10 +4,10 @@ import com.morshues.lazyathome.data.api.BanggaApiService
 import com.morshues.lazyathome.data.model.BanggaAnimationItem
 import com.morshues.lazyathome.data.model.BanggaCategoryItem
 import com.morshues.lazyathome.data.model.BanggaVideoItem
-import com.morshues.lazyathome.data.network.BanggaRetrofitClient
+import javax.inject.Inject
 
-class BanggaRepository(
-    private val api: BanggaApiService = BanggaRetrofitClient.apiService
+class BanggaRepository @Inject constructor(
+    private val api: BanggaApiService
 ) {
 
     suspend fun fetchCategoryItems(): Result<List<BanggaCategoryItem>> {

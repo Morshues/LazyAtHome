@@ -1,6 +1,5 @@
 package com.morshues.lazyathome.data.network
 
-import android.content.Context
 import android.util.Log
 import com.morshues.lazyathome.data.repository.AuthRepository
 import com.morshues.lazyathome.settings.SettingsManager
@@ -14,7 +13,7 @@ import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 
 class TokenInterceptor(
-    private val context: Context,
+    private val settingsManager: SettingsManager,
     private val authRepository: AuthRepository
 ) : Interceptor {
     private val refreshMutex = Mutex()
@@ -45,29 +44,28 @@ class TokenInterceptor(
     }
 
     private suspend fun getValidAccessToken(): String? {
-        val currentToken = SettingsManager.getAccessToken(context)
+        val currentToken = settingsManager.getAccessToken()
             ?: return null
 
-        val expiresAt = SettingsManager.getTokenExpiresAt(context)
+        val expiresAt = settingsManager.getTokenExpiresAt()
         if (expiresAt != null) {
             val now = System.currentTimeMillis()
 
             if (expiresAt - now < REFRESH_THRESHOLD) {
                 refreshMutex.withLock {
                     // Double-check after acquiring lock (another coroutine might have refreshed)
-                    val latestToken = SettingsManager.getAccessToken(context)
-                    val latestExpiry = SettingsManager.getTokenExpiresAt(context)
+                    val latestToken = settingsManager.getAccessToken()
+                    val latestExpiry = settingsManager.getTokenExpiresAt()
 
                     if (latestExpiry != null && latestExpiry - System.currentTimeMillis() < REFRESH_THRESHOLD) {
-                        val refreshToken = SettingsManager.getRefreshToken(context)
+                        val refreshToken = settingsManager.getRefreshToken()
                             ?: throw IllegalStateException("No refresh token available")
-                        val deviceId = SettingsManager.getOrCreateDeviceId(context)
+                        val deviceId = settingsManager.getOrCreateDeviceId()
 
                         try {
                             val newTokens = authRepository.refresh(refreshToken, deviceId)
                             val newExpiresAt = JwtUtils.getExpirationTime(newTokens.accessToken)
-                            SettingsManager.saveTokens(
-                                context,
+                            settingsManager.saveTokens(
                                 newTokens.accessToken,
                                 newTokens.refreshToken,
                                 newExpiresAt,

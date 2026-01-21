@@ -10,9 +10,12 @@ import com.morshues.lazyathome.data.repository.TgVideoRepository
 import com.morshues.lazyathome.ui.common.IVideoListModel
 import com.morshues.lazyathome.player.IPlayable
 import com.morshues.lazyathome.player.StaticPlayableItem
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class TgVideoViewModel(
+@HiltViewModel
+class TgVideoViewModel @Inject constructor(
     private val repository: TgVideoRepository
 ) : ViewModel(), IVideoListModel {
     private val _dataList = MutableLiveData<List<TgVideoItem>>()

@@ -17,8 +17,9 @@ class TgVideoRowController(
     title: String,
     private val activity: FragmentActivity,
     private val viewModel: TgVideoViewModel,
+    private val settingsManager: SettingsManager,
 ) : BaseRowController(viewModel) {
-    private val accessToken = SettingsManager.getAccessToken(activity)?: ""
+    private val accessToken = settingsManager.getAccessToken() ?: ""
     private val cardPresenter = bindClick(TgVideoCardPresenter(accessToken))
     private val rowAdapter = ArrayObjectAdapter(cardPresenter)
     private val header = HeaderItem(0, title)
@@ -38,7 +39,7 @@ class TgVideoRowController(
     }
 
     override fun loadData() {
-        viewModel.loadData(SettingsManager.getNSFW(activity))
+        viewModel.loadData(settingsManager.getNSFW())
     }
 
     override fun onClick(item: Any) {

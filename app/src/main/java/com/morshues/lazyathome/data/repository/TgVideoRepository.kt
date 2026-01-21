@@ -7,8 +7,9 @@ import com.morshues.lazyathome.data.model.TgVideoItem
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.inject.Inject
 
-class TgVideoRepository(
+class TgVideoRepository @Inject constructor(
     private val api: ApiService
 ) {
     fun fetchVideoList(nsfw: Boolean, onSuccess: (List<TgVideoItem>) -> Unit, onError: (String) -> Unit) {

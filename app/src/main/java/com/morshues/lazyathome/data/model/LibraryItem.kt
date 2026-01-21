@@ -1,6 +1,6 @@
 package com.morshues.lazyathome.data.model
 
-import com.morshues.lazyathome.data.network.RetrofitClient
+import com.morshues.lazyathome.data.network.UrlProvider
 
 sealed class LibraryItem {
     abstract val name: String
@@ -19,8 +19,8 @@ sealed class LibraryItem {
         val thumbnail: String
     ) : LibraryItem() {
         val url: String
-            get() = RetrofitClient.baseUrl + "library/" + path
+            get() = UrlProvider.baseUrl + "library/" + path
         val src: String
-            get() = RetrofitClient.baseUrl + "library/" + thumbnail
+            get() = UrlProvider.baseUrl + "library/" + thumbnail
     }
 }

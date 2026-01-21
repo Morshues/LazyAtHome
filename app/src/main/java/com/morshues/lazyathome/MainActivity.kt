@@ -2,10 +2,12 @@ package com.morshues.lazyathome
 
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * Loads [MainFragment].
  */
+@AndroidEntryPoint
 class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

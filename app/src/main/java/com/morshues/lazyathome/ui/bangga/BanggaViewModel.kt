@@ -11,10 +11,14 @@ import com.morshues.lazyathome.data.model.BanggaEpisode
 import com.morshues.lazyathome.data.repository.BanggaRepository
 import com.morshues.lazyathome.ui.common.IVideoListModel
 import com.morshues.lazyathome.player.IPlayable
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class BanggaViewModel : ViewModel(), IVideoListModel {
-    private val repository = BanggaRepository()
+@HiltViewModel
+class BanggaViewModel @Inject constructor(
+    private val repository: BanggaRepository
+) : ViewModel(), IVideoListModel {
 
     private val _categoryList = MutableLiveData<List<BanggaCategoryItem>>()
     private val _animationItem = MutableLiveData<BanggaAnimationItem?>()

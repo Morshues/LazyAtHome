@@ -8,8 +8,11 @@ import com.morshues.lazyathome.data.repository.LibraryRepository
 import com.morshues.lazyathome.ui.common.IVideoListModel
 import com.morshues.lazyathome.player.IPlayable
 import com.morshues.lazyathome.player.StaticPlayableItem
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class LibraryViewModel(
+@HiltViewModel
+class LibraryViewModel @Inject constructor(
     private val repository: LibraryRepository
 ) : ViewModel(), IVideoListModel {
     private lateinit var rootList: List<LibraryItem>

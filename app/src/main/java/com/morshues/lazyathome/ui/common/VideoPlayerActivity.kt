@@ -26,14 +26,26 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.DefaultTimeBar
 import androidx.media3.ui.PlayerControlView
 import com.morshues.lazyathome.databinding.ActivityVideoPlayerBinding
-import com.morshues.lazyathome.di.AppModule
+import com.morshues.lazyathome.di.VideoStreamingClient
 import com.morshues.lazyathome.player.IPlayable
 import com.morshues.lazyathome.player.VideoPlayerLauncherHolder
 import com.morshues.lazyathome.settings.SettingsManager
 import com.morshues.lazyathome.util.formatDurationMSPair
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class VideoPlayerActivity : ComponentActivity() {
+
+    @Inject
+    @VideoStreamingClient
+    lateinit var videoStreamingOkHttpClient: OkHttpClient
+
+    @Inject
+    lateinit var settingsManager: SettingsManager
+
     private lateinit var binding: ActivityVideoPlayerBinding
     private var player: ExoPlayer? = null
 
@@ -108,9 +120,9 @@ class VideoPlayerActivity : ComponentActivity() {
 
     @OptIn(UnstableApi::class)
     private fun initializePlayer() {
-        val seekButtonsMs = SettingsManager.getButtonSeekStepMs(this)
-        val timeBarSeekMs = SettingsManager.getTimeBarSeekStepMs(this)
-        remoteSeekMs = SettingsManager.getRemoteSeekStepMs(this)
+        val seekButtonsMs = settingsManager.getButtonSeekStepMs()
+        val timeBarSeekMs = settingsManager.getTimeBarSeekStepMs()
+        remoteSeekMs = settingsManager.getRemoteSeekStepMs()
 
         val loadingView = binding.playerView.findViewById<ProgressBar>(androidx.media3.ui.R.id.exo_buffering)
         loadingView.indeterminateTintList = ColorStateList.valueOf(Color.WHITE)
@@ -128,7 +140,7 @@ class VideoPlayerActivity : ComponentActivity() {
             playVideo(currentIndex-1)
         }
 
-        val dataSourceFactory = OkHttpDataSource.Factory(AppModule.videoStreamingOkHttpClient)
+        val dataSourceFactory = OkHttpDataSource.Factory(videoStreamingOkHttpClient)
         val mediaSourceFactory = DefaultMediaSourceFactory(this)
             .setDataSourceFactory(dataSourceFactory)
         player = ExoPlayer.Builder(this)

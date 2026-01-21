@@ -1,6 +1,6 @@
 package com.morshues.lazyathome.data.model
 
-import com.morshues.lazyathome.data.network.RetrofitClient
+import com.morshues.lazyathome.data.network.UrlProvider
 import com.morshues.lazyathome.util.formatDuration
 
 data class TgVideoItem(
@@ -12,10 +12,10 @@ data class TgVideoItem(
     val createdAt: String,
 ) {
     val url: String
-        get() = RetrofitClient.baseUrl + "tg/video_api?id=" + id
+        get() = UrlProvider.baseUrl + "tg/video_api?id=" + id
 
     val thumbnail: String
-        get() = RetrofitClient.baseUrl + "tg/video_thumbs_api?id=" + id
+        get() = UrlProvider.baseUrl + "tg/video_thumbs_api?id=" + id
 
     val durationStr: String
         get() = formatDuration(duration)

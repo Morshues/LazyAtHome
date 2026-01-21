@@ -7,9 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.morshues.lazyathome.data.model.EditLinkPageRequestData
 import com.morshues.lazyathome.data.model.LinkPage
 import com.morshues.lazyathome.data.repository.LinkPageRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LinkPageViewModel(
+@HiltViewModel
+class LinkPageViewModel @Inject constructor(
     private val repository: LinkPageRepository
 ) : ViewModel() {
     private val _rootList = MutableLiveData<List<LinkPage>>()

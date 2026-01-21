@@ -18,9 +18,15 @@ import com.morshues.lazyathome.ui.bangga.BanggaRowController
 import com.morshues.lazyathome.ui.library.LibraryRowController
 import com.morshues.lazyathome.ui.tg.TgVideoRowController
 import com.morshues.lazyathome.ui.linkpage.LinkPageRowController
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.Collections
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class RowOrderFragment : Fragment() {
+
+    @Inject
+    lateinit var settingsManager: SettingsManager
 
     private lateinit var rows: MutableList<RowSetting>
     private lateinit var adapter: ArrayAdapter<RowSetting>
@@ -50,7 +56,7 @@ class RowOrderFragment : Fragment() {
         listView = ListView(context)
         layout.addView(listView)
 
-        rows = SettingsManager.getRowOrderWithEnabled(context).ifEmpty {
+        rows = settingsManager.getRowOrderWithEnabled().ifEmpty {
             DEFAULT_ROW_OPTIONS.toMutableList()
         }
 
@@ -144,7 +150,7 @@ class RowOrderFragment : Fragment() {
     }
 
     private fun saveSettings() {
-        SettingsManager.saveRowOrderAndEnabled(requireContext(), rows)
+        settingsManager.saveRowOrderAndEnabled(rows)
     }
 
     companion object {

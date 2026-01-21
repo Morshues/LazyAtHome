@@ -5,8 +5,9 @@ import com.morshues.lazyathome.data.model.LibraryItem
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.inject.Inject
 
-class LibraryRepository(
+class LibraryRepository @Inject constructor(
     private val api: ApiService
 ) {
     fun fetchLibraryList(onSuccess: (List<LibraryItem>) -> Unit, onError: (String) -> Unit) {
