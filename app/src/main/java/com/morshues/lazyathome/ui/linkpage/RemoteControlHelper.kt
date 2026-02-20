@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import com.morshues.lazyathome.R
 import com.morshues.lazyathome.settings.SettingsManager
+import com.morshues.lazyathome.websocket.WsMessage
 import java.lang.ref.WeakReference
 
 class RemoteControlHelper(
@@ -276,4 +277,20 @@ class RemoteControlHelper(
 
     enum class Direction { UP, DOWN, LEFT, RIGHT }
     enum class RemoteMode { DRAG_SCROLL, CHANGE_DRAG_POSITION, ZOOM_MODE, EXTRA }
+
+
+    val handler = fun (msg: WsMessage): Boolean {
+        return when (msg.action) {
+            WS_ACTION_OPEN_URL -> {
+                val url = msg.data?.get("url")?.asString ?: return false
+                webView.loadUrl(url)
+                true
+            }
+            else -> false
+        }
+    }
+
+    companion object {
+        private const val WS_ACTION_OPEN_URL = "open_url"
+    }
 }

@@ -72,6 +72,10 @@ class SettingsManager @Inject constructor(
         return prefs.getInt("link_page_scroll_speed", 100).toFloat()
     }
 
+    fun getWebSocketPort(): Int {
+        return prefs.getInt("websocket_port", 8765)
+    }
+
     fun getOrCreateDeviceId(): String {
         val existingId = prefs.getString(KEY_DEVICE_ID, null)
         return if (existingId != null) {

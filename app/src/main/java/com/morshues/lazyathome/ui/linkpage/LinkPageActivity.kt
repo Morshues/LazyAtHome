@@ -11,14 +11,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import com.morshues.lazyathome.databinding.ActivityLinkPageBinding
 import com.morshues.lazyathome.settings.SettingsManager
+import com.morshues.lazyathome.websocket.WebSocketServerManager
+import com.morshues.lazyathome.websocket.collectWsCommands
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class LinkPageActivity : ComponentActivity() {
 
-    @Inject
-    lateinit var settingsManager: SettingsManager
+    @Inject lateinit var settingsManager: SettingsManager
+    @Inject lateinit var serverManager: WebSocketServerManager
 
     private lateinit var binding: ActivityLinkPageBinding
     private lateinit var remoteControlHelper: RemoteControlHelper
@@ -52,6 +54,8 @@ class LinkPageActivity : ComponentActivity() {
         }
 
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+
+        collectWsCommands(this, serverManager, remoteControlHelper.handler)
     }
 
     @SuppressLint("RestrictedApi")

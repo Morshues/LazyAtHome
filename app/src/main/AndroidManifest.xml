@@ -41,6 +41,10 @@
         <activity
             android:name=".ui.settings.SettingsActivity"
             android:exported="false"/>
+
+        <service
+            android:name=".websocket.WebSocketService"
+            android:exported="false" />
     </application>
 
 </manifest>
