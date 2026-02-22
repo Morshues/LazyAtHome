@@ -15,6 +15,7 @@ import androidx.core.view.isVisible
 import com.morshues.lazyathome.R
 import com.morshues.lazyathome.settings.SettingsManager
 import com.morshues.lazyathome.websocket.WsMessage
+import com.morshues.lazyathome.websocket.WsMessage.Companion.ACTION_LINK_PAGE_NAVIGATE
 import java.lang.ref.WeakReference
 
 class RemoteControlHelper(
@@ -168,7 +169,7 @@ class RemoteControlHelper(
 
     private fun handleDirectionalKey(direction: Direction) {
         when (currentMode) {
-            RemoteMode.DRAG_SCROLL -> simulateDragScroll(webView, direction)
+            RemoteMode.DRAG_SCROLL -> simulateDragScroll(webView, direction, dragScrollSpeed)
             RemoteMode.CHANGE_DRAG_POSITION -> {
                 when (direction) {
                     Direction.UP -> dragCenterY = (dragCenterY - 20).coerceAtLeast(1f)
@@ -180,12 +181,10 @@ class RemoteControlHelper(
             }
             RemoteMode.ZOOM_MODE -> {
                 if (direction == Direction.UP) {
-                    currentZoom += 0.1f
+                    zoom(0.1f)
                 } else if (direction == Direction.DOWN) {
-                    currentZoom -= 0.1f
+                    zoom(-0.1f)
                 }
-                webView.evaluateJavascript("document.body.style.zoom = '${currentZoom}'", null)
-                // webView.setInitialScale((currentZoom * 100).toInt())
             }
             RemoteMode.EXTRA -> handleExtraMode(direction)
         }
@@ -193,13 +192,20 @@ class RemoteControlHelper(
 
     private fun handleExtraMode(direction: Direction) {
         when (direction) {
-            Direction.UP -> {
-                webView.evaluateJavascript("""
-                    window.toggleInvert()
-                """.trimIndent(), null)
-            }
+            Direction.UP -> invertBg()
             else -> Toast.makeText(contextRef.get(), "No function", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun invertBg() {
+        webView.evaluateJavascript("""
+                    window.toggleInvert()
+                """.trimIndent(), null)
+    }
+
+    private fun zoom(delta: Float) {
+        currentZoom += delta
+        webView.evaluateJavascript("document.body.style.zoom = '${currentZoom}'", null)
     }
 
     private fun updatePanel() {
@@ -249,12 +255,12 @@ class RemoteControlHelper(
         upEvent.recycle()
     }
 
-    private fun simulateDragScroll(webView: WebView, direction: Direction) {
+    private fun simulateDragScroll(webView: WebView, direction: Direction, speed: Float) {
         val (deltaX, deltaY) = when (direction) {
-            Direction.UP -> Pair(0f, dragScrollSpeed)
-            Direction.DOWN -> Pair(0f, -dragScrollSpeed)
-            Direction.LEFT -> Pair(-dragScrollSpeed, 0f)
-            Direction.RIGHT -> Pair(dragScrollSpeed, 0f)
+            Direction.UP -> Pair(0f, speed)
+            Direction.DOWN -> Pair(0f, -speed)
+            Direction.LEFT -> Pair(-speed, 0f)
+            Direction.RIGHT -> Pair(speed, 0f)
         }
         val endX = dragCenterX + deltaX
         val endY = dragCenterY + deltaY
@@ -279,18 +285,25 @@ class RemoteControlHelper(
     enum class RemoteMode { DRAG_SCROLL, CHANGE_DRAG_POSITION, ZOOM_MODE, EXTRA }
 
 
-    val handler = fun (msg: WsMessage): Boolean {
-        return when (msg.action) {
-            WS_ACTION_OPEN_URL -> {
-                val url = msg.data?.get("url")?.asString ?: return false
-                webView.loadUrl(url)
-                true
-            }
-            else -> false
-        }
-    }
+    val wsRemoteHandler = fun (msg: WsMessage): Boolean {
+        if (msg.action != ACTION_LINK_PAGE_NAVIGATE) return false
 
-    companion object {
-        private const val WS_ACTION_OPEN_URL = "open_url"
+        val instruction = msg.data?.get("instruction")?.asString
+        when (instruction) {
+            "bg_inv" -> invertBg()
+            "zoom" -> {
+                val delta = msg.data.get("delta")?.asFloat ?: 0f
+                zoom(delta)
+            }
+            "scroll" -> {
+                try {
+                    val direction = Direction.valueOf(msg.data.get("direction")?.asString?.uppercase() ?: "")
+                    val delta = msg.data.get("delta")?.asFloat ?: 0f
+                    simulateDragScroll(webView, direction, delta)
+                } catch (_: Exception) { }
+            }
+        }
+
+        return true
     }
 }

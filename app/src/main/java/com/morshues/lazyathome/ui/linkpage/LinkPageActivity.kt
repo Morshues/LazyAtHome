@@ -55,7 +55,7 @@ class LinkPageActivity : ComponentActivity() {
 
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
-        collectWsCommands(this, serverManager, remoteControlHelper.handler)
+        collectWsCommands(this, serverManager, remoteControlHelper.wsRemoteHandler)
     }
 
     @SuppressLint("RestrictedApi")
