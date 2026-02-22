@@ -1,6 +1,10 @@
 package com.morshues.lazyathome.websocket
 
+import android.content.Context
+import android.content.Intent
 import android.util.Log
+import com.morshues.lazyathome.MainActivity
+import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ktor.server.application.install
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.EmbeddedServer
@@ -24,7 +28,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class WebSocketServerManager @Inject constructor() {
+class WebSocketServerManager @Inject constructor(
+    @param:ApplicationContext private val context: Context,
+) {
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var server: EmbeddedServer<*, *>? = null
@@ -44,7 +50,7 @@ class WebSocketServerManager @Inject constructor() {
                 webSocket("/") {
                     sessions += this
                     Log.i(TAG, "Client connected (${sessions.size} total)")
-                    currentScreen?.let { send(WsMessage.toJson(ACTION_CURRENT_SCREEN, mapOf("name" to it))) }
+                    currentScreen?.let { send(WsMessage.toJson(WsMessage.EVENT_CURRENT_SCREEN, mapOf("name" to it))) }
                     try {
                         for (frame in incoming) {
                             if (frame is Frame.Text) {
@@ -52,14 +58,16 @@ class WebSocketServerManager @Inject constructor() {
                                 Log.d(TAG, "Received: $text")
                                 try {
                                     val msg = WsMessage.fromJson(text)
-                                    if (msg.action == WsMessage.ACTION_PING) {
-                                        send(WsMessage.toJson("pong"))
-                                    } else {
-                                        _commands.tryEmit(msg)
+                                    when (msg.action) {
+                                        WsMessage.ACTION_PING -> send(WsMessage.toJson(WsMessage.EVENT_PONG))
+                                        WsMessage.ACTION_HOME -> navigateHome()
+                                        else -> {
+                                            _commands.tryEmit(msg)
+                                        }
                                     }
                                 } catch (e: Exception) {
                                     Log.w(TAG, "Invalid message: $text", e)
-                                    send(WsMessage.toJson("error", mapOf("message" to "Invalid JSON")))
+                                    send(WsMessage.toJson(WsMessage.EVENT_ERROR, mapOf("message" to "Invalid JSON")))
                                 }
                             }
                         }
@@ -84,8 +92,17 @@ class WebSocketServerManager @Inject constructor() {
         }
     }
 
+    private fun navigateHome() {
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        context.startActivity(intent)
+    }
+
     fun broadcastScreenUpdated(screen: String) {
-        broadcast(ACTION_CURRENT_SCREEN, mapOf("name" to screen))
+        broadcast(WsMessage.EVENT_CURRENT_SCREEN, mapOf("name" to screen))
         currentScreen = screen
     }
 
@@ -97,6 +114,5 @@ class WebSocketServerManager @Inject constructor() {
 
     companion object {
         private const val TAG = "WebSocketServer"
-        const val ACTION_CURRENT_SCREEN = "current_screen"
     }
 }

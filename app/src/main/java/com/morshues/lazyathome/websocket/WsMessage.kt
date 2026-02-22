@@ -18,6 +18,15 @@ data class WsMessage(
             return gson.toJson(msg)
         }
 
+        // Client -> Server
         const val ACTION_PING = "ping"
+        const val ACTION_HOME = "home"
+        const val ACTION_BACK = "back"
+        const val ACTION_OPEN_URL = "open_url"
+
+        // Server -> Client
+        const val EVENT_PONG = "pong"
+        const val EVENT_ERROR = "error"
+        const val EVENT_CURRENT_SCREEN = "current_screen"
     }
 }
