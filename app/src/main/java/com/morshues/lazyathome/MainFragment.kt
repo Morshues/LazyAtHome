@@ -15,7 +15,11 @@ import android.view.View
 import android.widget.Toast
 import androidx.leanback.app.BackgroundManager
 import androidx.leanback.app.BrowseSupportFragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.leanback.widget.ArrayObjectAdapter
+import androidx.leanback.widget.ListRow
 import androidx.leanback.widget.ListRowPresenter
 import androidx.leanback.widget.OnItemViewSelectedListener
 import androidx.leanback.widget.Presenter
@@ -24,12 +28,16 @@ import androidx.leanback.widget.RowPresenter
 import androidx.core.content.ContextCompat
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.morshues.lazyathome.settings.SettingsManager
+import com.morshues.lazyathome.websocket.WebSocketServerManager
+import com.morshues.lazyathome.websocket.WsMessage
+import kotlinx.coroutines.launch
 import com.morshues.lazyathome.ui.bangga.BanggaRowController
 import com.morshues.lazyathome.ui.bangga.BanggaViewModel
 import com.morshues.lazyathome.ui.common.BaseRowController
@@ -42,6 +50,7 @@ import com.morshues.lazyathome.ui.tg.TgVideoRowController
 import com.morshues.lazyathome.ui.tg.TgVideoViewModel
 import com.morshues.lazyathome.ui.linkpage.LinkPageRowController
 import com.morshues.lazyathome.ui.linkpage.LinkPageViewModel
+import com.morshues.lazyathome.websocket.collectWsCommands
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -51,8 +60,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainFragment : BrowseSupportFragment() {
 
-    @Inject
-    lateinit var settingsManager: SettingsManager
+    @Inject lateinit var settingsManager: SettingsManager
+    @Inject lateinit var serverManager: WebSocketServerManager
 
     private val mHandler = Handler(Looper.myLooper()!!)
     private lateinit var mBackgroundManager: BackgroundManager
@@ -98,6 +107,7 @@ class MainFragment : BrowseSupportFragment() {
         initRows()
         loadRows()
         setupEventListeners()
+        collectCommands()
     }
 
     override fun onDestroy() {
@@ -251,6 +261,51 @@ class MainFragment : BrowseSupportFragment() {
         override fun run() {
             mHandler.post { updateBackground(mBackgroundUri) }
         }
+    }
+
+    private fun collectCommands() {
+        collectWsCommands(viewLifecycleOwner, serverManager) { msg ->
+            when (msg.action) {
+                WsMessage.ACTION_MAIN_NAVIGATE -> {
+                    val navi = msg.data?.get("d")?.asString
+                    when (navi) {
+                        "up" -> moveRows(-1)
+                        "down" -> moveRows(1)
+                        "left" -> moveItems(-1)
+                        "right" -> moveItems(1)
+                        "ok" -> performOk()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun moveRows(delta: Int) {
+        val rowCount = adapter?.size() ?: return
+        val newPos = (selectedPosition + delta).coerceIn(0, rowCount - 1)
+        setSelectedPosition(newPos, true)
+    }
+
+    private fun moveItems(delta: Int) {
+        if (isShowingHeaders) {
+            if (delta > 0) startHeadersTransition(false)
+            return
+        }
+        val rowVh = rowsSupportFragment
+            ?.getRowViewHolder(selectedPosition) as? ListRowPresenter.ViewHolder ?: return
+        val listRow = (adapter as? ArrayObjectAdapter)
+            ?.get(selectedPosition) as? ListRow ?: return
+        val newPos = (rowVh.gridView.selectedPosition + delta)
+            .coerceIn(0, listRow.adapter.size() - 1)
+        rowVh.gridView.setSelectedPositionSmooth(newPos)
+    }
+
+    private fun performOk() {
+        if (isShowingHeaders) {
+            startHeadersTransition(false)
+            return
+        }
+        requireActivity().currentFocus?.performClick()
     }
 
     companion object {

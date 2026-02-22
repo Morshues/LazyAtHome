@@ -1,6 +1,7 @@
 package com.morshues.lazyathome.websocket
 
 import androidx.activity.ComponentActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -25,6 +26,20 @@ fun ComponentActivity.collectWsCommands(
             serverManager.commands.collect { msg ->
                 if (handler?.invoke(msg) == true) return@collect
                 handleDefaultCommand(msg)
+            }
+        }
+    }
+}
+
+fun Fragment.collectWsCommands(
+    lifecycleOwner: LifecycleOwner,
+    serverManager: WebSocketServerManager,
+    handler: ((WsMessage) -> Unit)? = null,
+) {
+    lifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            serverManager.commands.collect { msg ->
+                handler?.invoke(msg)
             }
         }
     }

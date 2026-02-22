@@ -23,6 +23,7 @@ data class WsMessage(
         const val ACTION_HOME = "home"
         const val ACTION_BACK = "back"
         const val ACTION_OPEN_URL = "open_url"
+        const val ACTION_MAIN_NAVIGATE = "main_navigate"
 
         // Server -> Client
         const val EVENT_PONG = "pong"
