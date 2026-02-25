@@ -18,8 +18,8 @@ android {
         applicationId = "com.morshues.lazyathome"
         minSdk = 24
         targetSdk = 36
-        versionCode = 31
-        versionName = "0.8.0"
+        versionCode = 32
+        versionName = "0.8.1"
 
         buildConfigField("String", "BASE_URL", "\"http://192.168.1.126:3000/\"")
     }
