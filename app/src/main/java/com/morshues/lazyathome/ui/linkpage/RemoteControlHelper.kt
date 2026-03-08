@@ -169,7 +169,15 @@ class RemoteControlHelper(
 
     private fun handleDirectionalKey(direction: Direction) {
         when (currentMode) {
-            RemoteMode.DRAG_SCROLL -> simulateDragScroll(webView, direction, dragScrollSpeed)
+            RemoteMode.DRAG_SCROLL -> {
+                val (deltaX, deltaY) = when (direction) {
+                    Direction.UP -> Pair(0f, dragScrollSpeed)
+                    Direction.DOWN -> Pair(0f, -dragScrollSpeed)
+                    Direction.LEFT -> Pair(-dragScrollSpeed, 0f)
+                    Direction.RIGHT -> Pair(dragScrollSpeed, 0f)
+                }
+                simulateDragScroll(webView, deltaX, deltaY)
+            }
             RemoteMode.CHANGE_DRAG_POSITION -> {
                 when (direction) {
                     Direction.UP -> dragCenterY = (dragCenterY - 20).coerceAtLeast(1f)
@@ -255,13 +263,7 @@ class RemoteControlHelper(
         upEvent.recycle()
     }
 
-    private fun simulateDragScroll(webView: WebView, direction: Direction, speed: Float) {
-        val (deltaX, deltaY) = when (direction) {
-            Direction.UP -> Pair(0f, speed)
-            Direction.DOWN -> Pair(0f, -speed)
-            Direction.LEFT -> Pair(-speed, 0f)
-            Direction.RIGHT -> Pair(speed, 0f)
-        }
+    private fun simulateDragScroll(webView: WebView, deltaX: Float, deltaY: Float) {
         val endX = dragCenterX + deltaX
         val endY = dragCenterY + deltaY
         val downTime = SystemClock.uptimeMillis()
@@ -297,9 +299,9 @@ class RemoteControlHelper(
             }
             "scroll" -> {
                 try {
-                    val direction = Direction.valueOf(msg.data.get("direction")?.asString?.uppercase() ?: "")
-                    val delta = msg.data.get("delta")?.asFloat ?: 0f
-                    simulateDragScroll(webView, direction, delta)
+                    val x = msg.data.get("x")?.asFloat ?: 0f
+                    val y = msg.data.get("y")?.asFloat ?: 0f
+                    simulateDragScroll(webView, x, y)
                 } catch (_: Exception) { }
             }
         }
