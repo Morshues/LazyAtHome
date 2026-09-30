@@ -101,6 +101,11 @@ class SettingsFragment : LeanbackPreferenceFragmentCompat() {
         val loginButton = dialogView.findViewById<Button>(R.id.login_button)
         val cancelButton = dialogView.findViewById<Button>(R.id.cancel_button)
 
+        settingsManager.getSavedLoginCredentials()?.let { (email, password) ->
+            emailInput.setText(email)
+            passwordInput.setText(password)
+        }
+
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
             .setCancelable(true)
@@ -157,6 +162,7 @@ class SettingsFragment : LeanbackPreferenceFragmentCompat() {
                         response.user.email,
                         response.user.name
                     )
+                    settingsManager.saveLoginCredentials(email, password)
 
                     // Update UI
                     updateLoginStatus()

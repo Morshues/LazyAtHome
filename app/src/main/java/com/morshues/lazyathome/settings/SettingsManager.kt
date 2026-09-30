@@ -1,12 +1,20 @@
 package com.morshues.lazyathome.settings
 
 import android.content.Context
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
+import android.util.Base64
 import androidx.preference.PreferenceManager
 import com.morshues.lazyathome.BuildConfig
 import com.morshues.lazyathome.ui.settings.RowOrderFragment.Companion.DEFAULT_ROW_OPTIONS
 import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.security.KeyStore
 import java.util.UUID
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -141,6 +149,62 @@ class SettingsManager @Inject constructor(
         return getAccessToken() != null
     }
 
+    fun saveLoginCredentials(email: String, password: String) {
+        val encryptedPassword = try {
+            encrypt(password)
+        } catch (e: Exception) {
+            return
+        }
+        prefs.edit {
+            putString(KEY_SAVED_LOGIN_EMAIL, email)
+            putString(KEY_SAVED_LOGIN_PASSWORD, encryptedPassword)
+        }
+    }
+
+    fun getSavedLoginCredentials(): Pair<String, String>? {
+        val email = prefs.getString(KEY_SAVED_LOGIN_EMAIL, null) ?: return null
+        val encryptedPassword = prefs.getString(KEY_SAVED_LOGIN_PASSWORD, null) ?: return null
+        val password = try {
+            decrypt(encryptedPassword)
+        } catch (e: Exception) {
+            return null
+        }
+        return email to password
+    }
+
+    private fun getOrCreateLoginKey(): SecretKey {
+        val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
+        (keyStore.getKey(LOGIN_KEY_ALIAS, null) as? SecretKey)?.let { return it }
+
+        val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE)
+        keyGenerator.init(
+            KeyGenParameterSpec.Builder(
+                LOGIN_KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+            )
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .build()
+        )
+        return keyGenerator.generateKey()
+    }
+
+    private fun encrypt(plainText: String): String {
+        val cipher = Cipher.getInstance(CIPHER_TRANSFORMATION)
+        cipher.init(Cipher.ENCRYPT_MODE, getOrCreateLoginKey())
+        val cipherText = cipher.doFinal(plainText.toByteArray(Charsets.UTF_8))
+        return Base64.encodeToString(cipher.iv + cipherText, Base64.NO_WRAP)
+    }
+
+    private fun decrypt(encoded: String): String {
+        val data = Base64.decode(encoded, Base64.NO_WRAP)
+        val iv = data.copyOfRange(0, GCM_IV_LENGTH)
+        val cipherText = data.copyOfRange(GCM_IV_LENGTH, data.size)
+        val cipher = Cipher.getInstance(CIPHER_TRANSFORMATION)
+        cipher.init(Cipher.DECRYPT_MODE, getOrCreateLoginKey(), GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv))
+        return String(cipher.doFinal(cipherText), Charsets.UTF_8)
+    }
+
     companion object {
         private const val DEFAULT_SERVER_PATH = BuildConfig.BASE_URL
 
@@ -150,5 +214,13 @@ class SettingsManager @Inject constructor(
         private const val KEY_DEVICE_ID = "device_id"
         private const val KEY_CACHED_EMAIL = "cached_email"
         private const val KEY_CACHED_USER_NAME = "user_name"
+        private const val KEY_SAVED_LOGIN_EMAIL = "saved_login_email"
+        private const val KEY_SAVED_LOGIN_PASSWORD = "saved_login_password"
+
+        private const val ANDROID_KEYSTORE = "AndroidKeyStore"
+        private const val LOGIN_KEY_ALIAS = "lazyathome_login_key"
+        private const val CIPHER_TRANSFORMATION = "AES/GCM/NoPadding"
+        private const val GCM_IV_LENGTH = 12
+        private const val GCM_TAG_LENGTH_BITS = 128
     }
 }
