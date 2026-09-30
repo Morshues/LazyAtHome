@@ -182,6 +182,10 @@ class MainFragment : BrowseSupportFragment() {
             val info = allRowInfos.find { it.id == id }
             if (info != null) {
                 val controller = info.controllerProvider()
+                controller.onRowChanged = { row ->
+                    val index = rowsAdapter.indexOf(row)
+                    if (index >= 0) rowsAdapter.notifyArrayItemRangeChanged(index, 1)
+                }
                 rowToControllerMap[controller.listRow] = controller
                 rowsAdapter.add(controller.listRow)
                 controller.loadData()

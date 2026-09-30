@@ -10,6 +10,7 @@ abstract class BaseRowController(
     private val videoListModel: IVideoListModel? = null,
 ) {
     abstract val listRow: ListRow
+    var onRowChanged: ((ListRow) -> Unit)? = null
     abstract fun loadData()
     fun handleBackPress(): Boolean {
         videoListModel?.apply {

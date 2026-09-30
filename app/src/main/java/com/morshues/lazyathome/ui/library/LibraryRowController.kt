@@ -11,7 +11,7 @@ import com.morshues.lazyathome.ui.common.BaseRowController
 import com.morshues.lazyathome.ui.common.VideoPlayerActivity
 
 class LibraryRowController(
-    title: String,
+    private val title: String,
     private val activity: FragmentActivity,
     private val viewModel: LibraryViewModel,
 ) : BaseRowController(viewModel) {
@@ -22,6 +22,10 @@ class LibraryRowController(
     override val listRow: ListRow = ListRow(header, rowAdapter)
 
     init {
+        viewModel.currentPath.observe(activity) { path ->
+            listRow.headerItem = HeaderItem(0, buildTitle(path))
+            onRowChanged?.invoke(listRow)
+        }
         viewModel.displayList.observe(activity) { itemList ->
             val uiList = mutableListOf<Any?>()
             if (viewModel.canGoBack) {
@@ -62,7 +66,17 @@ class LibraryRowController(
         }
     }
 
+    private fun buildTitle(path: List<String>): String {
+        val segments = if (path.size > MAX_PATH_SEGMENTS) {
+            listOf("…") + path.takeLast(MAX_PATH_SEGMENTS)
+        } else {
+            path
+        }
+        return (listOf(title) + segments).joinToString(" › ")
+    }
+
     companion object {
         const val ID = "library"
+        private const val MAX_PATH_SEGMENTS = 2
     }
 }

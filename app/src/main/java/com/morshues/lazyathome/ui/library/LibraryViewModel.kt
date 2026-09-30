@@ -19,6 +19,9 @@ class LibraryViewModel @Inject constructor(
     private val _displayList = MutableLiveData<List<LibraryItem>>()
     val displayList: LiveData<List<LibraryItem>> get() = _displayList
     private val backwardItemStack = ArrayDeque<List<LibraryItem>>()
+    private val pathStack = ArrayDeque<String>()
+    private val _currentPath = MutableLiveData<List<String>>()
+    val currentPath: LiveData<List<String>> get() = _currentPath
 
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> get() = _errorMessage
@@ -30,7 +33,9 @@ class LibraryViewModel @Inject constructor(
         repository.fetchLibraryList(
             onSuccess = { data ->
                 backwardItemStack.clear()
+                pathStack.clear()
                 rootList = data
+                _currentPath.postValue(emptyList())
                 _displayList.postValue(data)
             },
             onError = { error -> _errorMessage.postValue(error) }
@@ -39,11 +44,15 @@ class LibraryViewModel @Inject constructor(
 
     fun enterFolder(item: LibraryItem.FolderItem) {
         displayList.value?.let { backwardItemStack.add(it) }
+        pathStack.add(item.name)
+        _currentPath.postValue(pathStack.toList())
         _displayList.postValue(item.children)
     }
 
     override fun goBack() {
         val lastList = backwardItemStack.removeLastOrNull() ?: rootList
+        pathStack.removeLastOrNull()
+        _currentPath.postValue(pathStack.toList())
         _displayList.postValue(lastList)
     }
 
