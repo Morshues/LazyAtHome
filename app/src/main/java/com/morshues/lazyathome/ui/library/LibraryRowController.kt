@@ -55,10 +55,11 @@ class LibraryRowController(
     }
 
     override fun getBackgroundUri(item: Any?): String? {
-        if (item is LibraryItem.VideoItem) {
-            return item.src
+        return when (item) {
+            is LibraryItem.VideoItem -> item.src
+            is LibraryItem.FolderItem -> item.src
+            else -> null
         }
-        return null
     }
 
     companion object {

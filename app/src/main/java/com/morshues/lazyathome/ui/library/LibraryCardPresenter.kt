@@ -11,14 +11,16 @@ class LibraryCardPresenter : BaseCardPresenter() {
             cardView.titleText = item.name
             cardView.contentText = item.name
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT)
-            if (item is LibraryItem.VideoItem) {
-                cardView.mainImageView?.let { view ->
-                    Glide.with(viewHolder.view.context)
-                        .load(item.src)
-                        .centerCrop()
-                        .error(getDefaultCardImage())
-                        .into(view)
-                }
+            val src = when (item) {
+                is LibraryItem.VideoItem -> item.src
+                is LibraryItem.FolderItem -> item.src
+            }
+            cardView.mainImageView?.let { view ->
+                Glide.with(viewHolder.view.context)
+                    .load(src)
+                    .centerCrop()
+                    .error(getDefaultCardImage())
+                    .into(view)
             }
         }
     }

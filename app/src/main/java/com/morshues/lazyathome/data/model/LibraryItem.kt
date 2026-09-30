@@ -10,7 +10,17 @@ sealed class LibraryItem {
         override val name: String,
         override val type: String,
         val children: List<LibraryItem>
-    ) : LibraryItem()
+    ) : LibraryItem() {
+        val src: String? by lazy { findThumbnailSrc() }
+
+        private fun findThumbnailSrc(): String? {
+            children.firstOrNull { it is VideoItem && it.thumbnail.isNotBlank() }
+                ?.let { return (it as VideoItem).src }
+            return children.asSequence()
+                .filterIsInstance<FolderItem>()
+                .firstNotNullOfOrNull { it.src }
+        }
+    }
 
     data class VideoItem(
         override val name: String,
