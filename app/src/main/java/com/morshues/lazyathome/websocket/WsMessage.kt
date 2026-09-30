@@ -25,10 +25,12 @@ data class WsMessage(
         const val ACTION_OPEN_URL = "open_url"
         const val ACTION_MAIN_NAVIGATE = "main_navigate"
         const val ACTION_LINK_PAGE_NAVIGATE = "link_page_navigate"
+        const val ACTION_VIDEO_CONTROL = "video_control"
 
         // Server -> Client
         const val EVENT_PONG = "pong"
         const val EVENT_ERROR = "error"
         const val EVENT_CURRENT_SCREEN = "current_screen"
+        const val EVENT_VIDEO_STATE = "video_state"
     }
 }

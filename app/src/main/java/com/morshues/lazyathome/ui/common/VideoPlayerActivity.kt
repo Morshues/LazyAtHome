@@ -31,6 +31,9 @@ import com.morshues.lazyathome.player.IPlayable
 import com.morshues.lazyathome.player.VideoPlayerLauncherHolder
 import com.morshues.lazyathome.settings.SettingsManager
 import com.morshues.lazyathome.util.formatDurationMSPair
+import com.morshues.lazyathome.websocket.WebSocketServerManager
+import com.morshues.lazyathome.websocket.WsMessage
+import com.morshues.lazyathome.websocket.collectWsCommands
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -45,6 +48,9 @@ class VideoPlayerActivity : ComponentActivity() {
 
     @Inject
     lateinit var settingsManager: SettingsManager
+
+    @Inject
+    lateinit var serverManager: WebSocketServerManager
 
     private lateinit var binding: ActivityVideoPlayerBinding
     private var player: ExoPlayer? = null
@@ -95,6 +101,15 @@ class VideoPlayerActivity : ComponentActivity() {
         override fun onEvents(player: Player, events: Player.Events) {
             super.onEvents(player, events)
             refreshNavigationButtons()
+            if (events.containsAny(
+                    Player.EVENT_IS_PLAYING_CHANGED,
+                    Player.EVENT_MEDIA_ITEM_TRANSITION,
+                    Player.EVENT_POSITION_DISCONTINUITY,
+                    Player.EVENT_PLAYBACK_STATE_CHANGED,
+                    Player.EVENT_PLAYBACK_PARAMETERS_CHANGED,
+                )) {
+                broadcastState()
+            }
         }
     }
 
@@ -110,6 +125,8 @@ class VideoPlayerActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+
+        collectWsCommands(this, serverManager, wsRemoteHandler)
     }
 
     override fun onDestroy() {
@@ -179,18 +196,10 @@ class VideoPlayerActivity : ComponentActivity() {
         if (!binding.playerView.isControllerFullyVisible && isLeftRightKey) {
             when (event.action) {
                 KeyEvent.ACTION_DOWN -> {
-                    player?.let { p ->
-                        val position = p.currentPosition
-                        val duration = p.duration
-                        if (event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
-                            val newPosition = (position - remoteSeekMs).coerceAtLeast(0)
-                            p.seekTo(newPosition)
-                            resetTimeProgressTimeout()
-                        } else if (event.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-                            val newPosition = (position + remoteSeekMs).coerceAtMost(duration)
-                            p.seekTo(newPosition)
-                            resetTimeProgressTimeout()
-                        }
+                    if (event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                        seekBy(-remoteSeekMs)
+                    } else if (event.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                        seekBy(remoteSeekMs)
                     }
                     return true
                 }
@@ -200,6 +209,66 @@ class VideoPlayerActivity : ComponentActivity() {
             }
         }
         return super.dispatchKeyEvent(event)
+    }
+
+    private fun seekBy(deltaMs: Long) {
+        player?.let { p ->
+            val duration = p.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
+            p.seekTo((p.currentPosition + deltaMs).coerceIn(0, duration))
+            resetTimeProgressTimeout()
+        }
+    }
+
+    private fun seekTo(positionMs: Long) {
+        player?.let { p ->
+            val duration = p.duration.takeIf { it > 0 } ?: Long.MAX_VALUE
+            p.seekTo(positionMs.coerceIn(0, duration))
+            resetTimeProgressTimeout()
+        }
+    }
+
+    private val wsRemoteHandler = fun (msg: WsMessage): Boolean {
+        if (msg.action != WsMessage.ACTION_VIDEO_CONTROL) return false
+
+        val data = msg.data
+        when (data?.get("instruction")?.asString) {
+            "seek" -> runCatching { data.get("ms")?.asLong }.getOrNull()?.let { seekBy(it) }
+            "seek_to" -> {
+                val ms = runCatching { data.get("ms")?.asLong }.getOrNull()
+                val percent = runCatching { data.get("percent")?.asFloat }.getOrNull()
+                if (ms != null) {
+                    seekTo(ms)
+                } else if (percent != null) {
+                    player?.duration?.takeIf { it > 0 }?.let { duration ->
+                        seekTo((duration * percent.coerceIn(0f, 100f) / 100f).toLong())
+                    }
+                }
+            }
+            "play" -> player?.play()
+            "pause" -> player?.pause()
+            "play_pause" -> player?.let { if (it.isPlaying) it.pause() else it.play() }
+            "next" -> playVideo(currentIndex + 1)
+            "previous" -> playVideo(currentIndex - 1)
+            "speed" -> runCatching { data.get("value")?.asFloat }.getOrNull()?.let {
+                player?.setPlaybackSpeed(it.coerceIn(0.25f, 4.0f))
+            }
+            "get_state" -> broadcastState()
+        }
+
+        return true
+    }
+
+    private fun broadcastState() {
+        val p = player ?: return
+        serverManager.broadcast(WsMessage.EVENT_VIDEO_STATE, mapOf(
+            "title" to (playlist.getOrNull(currentIndex)?.title ?: ""),
+            "index" to currentIndex.toString(),
+            "count" to playlist.size.toString(),
+            "position" to p.currentPosition.toString(),
+            "duration" to p.duration.coerceAtLeast(0).toString(),
+            "isPlaying" to p.isPlaying.toString(),
+            "speed" to p.playbackParameters.speed.toString(),
+        ))
     }
 
     private fun playVideo(index: Int) {
