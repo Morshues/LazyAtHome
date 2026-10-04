@@ -41,6 +41,7 @@ class RemoteControlHelper(
     private var dragCenterY = 0f
     private var currentMode = RemoteMode.DRAG_SCROLL
     private var currentZoom = 1.0f
+    private val dragScroller = SmoothDragScroller(webView)
 
     fun initScripts() {
         webView.evaluateJavascript("""
@@ -115,6 +116,10 @@ class RemoteControlHelper(
         }
     }
 
+    fun release() {
+        dragScroller.release()
+    }
+
     fun setDragCenter(x: Float, y: Float) {
         dragCenterX = x
         dragCenterY = y
@@ -176,7 +181,7 @@ class RemoteControlHelper(
                     Direction.LEFT -> Pair(-dragScrollSpeed, 0f)
                     Direction.RIGHT -> Pair(dragScrollSpeed, 0f)
                 }
-                simulateDragScroll(webView, deltaX, deltaY)
+                dragScroller.addDelta(deltaX, deltaY)
             }
             RemoteMode.CHANGE_DRAG_POSITION -> {
                 when (direction) {
@@ -228,6 +233,7 @@ class RemoteControlHelper(
     }
 
     private fun updateDragAnchor() {
+        dragScroller.setCenter(dragCenterX, dragCenterY)
         val layoutParams = dragAnchor.layoutParams as FrameLayout.LayoutParams
         layoutParams.marginStart = dragCenterX.toInt()
         layoutParams.topMargin = dragCenterY.toInt()
@@ -263,26 +269,6 @@ class RemoteControlHelper(
         upEvent.recycle()
     }
 
-    private fun simulateDragScroll(webView: WebView, deltaX: Float, deltaY: Float) {
-        val endX = dragCenterX + deltaX
-        val endY = dragCenterY + deltaY
-        val downTime = SystemClock.uptimeMillis()
-        val touchDown = MotionEvent.obtain(
-            downTime, downTime,
-            MotionEvent.ACTION_DOWN,
-            dragCenterX, dragCenterY, 0
-        )
-        webView.dispatchTouchEvent(touchDown)
-        touchDown.recycle()
-        val moveEvent = MotionEvent.obtain(
-            downTime, downTime + 10,
-            MotionEvent.ACTION_MOVE,
-            endX, endY, 0
-        )
-        webView.dispatchTouchEvent(moveEvent)
-        moveEvent.recycle()
-    }
-
     enum class Direction { UP, DOWN, LEFT, RIGHT }
     enum class RemoteMode { DRAG_SCROLL, CHANGE_DRAG_POSITION, ZOOM_MODE, EXTRA }
 
@@ -301,7 +287,7 @@ class RemoteControlHelper(
                 try {
                     val x = msg.data.get("x")?.asFloat ?: 0f
                     val y = msg.data.get("y")?.asFloat ?: 0f
-                    simulateDragScroll(webView, x, y)
+                    dragScroller.addDelta(x, y)
                 } catch (_: Exception) { }
             }
         }

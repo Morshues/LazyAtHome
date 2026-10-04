@@ -61,6 +61,11 @@ class LinkPageActivity : ComponentActivity() {
         collectWsCommands(this, serverManager, remoteControlHelper.wsRemoteHandler)
     }
 
+    override fun onDestroy() {
+        remoteControlHelper.release()
+        super.onDestroy()
+    }
+
     @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (remoteControlHelper.onKeyEvent(event)) return true
