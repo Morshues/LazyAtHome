@@ -12,7 +12,7 @@ plugins {
 
 android {
     namespace = "com.morshues.lazyathome"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.morshues.lazyathome"
